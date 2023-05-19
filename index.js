@@ -1,12 +1,28 @@
 import express from "express";
-import router from "./src/routes/index.route";
+// import router from "./src/routes/index.route.js";
+import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import db from "./src/configs/db.config.js";
+import { Test } from "./src/models/template.model.js";
 dotenv.config()
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(router);
+app.use(bodyParser.json());
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
+
+/* try {
+    await db.authenticate();
+    // await Test.sync();
+} catch (error) {
+    console.log(error)
+} */
+
 app.use(express.json);
 app.get('/', (req, res) => {
     res.json({'Message': 'ok'})
