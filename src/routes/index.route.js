@@ -4,6 +4,7 @@ import articleController from "../controllers/article.controller.js";
 import usersController from "../controllers/users.controller.js";
 import adminController from "../controllers/admin.controller.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
+import verifyTokenMiddleware from "../middlewares/verifyToken.middleware.js";
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -11,12 +12,16 @@ router.get('/', (req, res) => {
 });
 
 /* Auth Admin & CS */
-router.post('/loginAdmin', adminController.login);
-router.post('/registerAdmin', adminController.register);
+router.post('/admin/login', adminController.login);
+router.post('/admin/register', adminController.register);
 
 /* Auth Users */
-router.post('/login', usersController.login);
-router.post('/register', usersController.register);
+router.post('/user/login', usersController.login);
+router.post('/user/register', usersController.register);
+
+/* Get All Users (Admin) */
+router.get('/admin/users', verifyTokenMiddleware.verifyTokenAdmin, usersController.getAllUsers);
+router.get('/cs/users', verifyTokenMiddleware.verifyTokenCustomerService, usersController.getAllUsers);
 
 /* FAQ */
 router.get('/faq', faqController.get);
