@@ -45,8 +45,8 @@ const Users = db.define('t_users', {
   }
 }, {
   freezeTableName: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   defaultScope: {
     attributes: {
       exclude: ['createdAt', 'updatedAt']

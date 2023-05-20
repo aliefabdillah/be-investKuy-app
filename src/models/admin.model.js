@@ -2,38 +2,45 @@ import { DataTypes } from "sequelize";
 import db from "../configs/db.config.js";
 
 export const Admin = db.define("t_admins", {
-    id:{
+    id: {
         type: DataTypes.BIGINT,
         primaryKey: true,
         allowNull: false,
         autoIncrement: true,
     },
-    username:{
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    username: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
     },
-    email:{
+    email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
     },
-    password:{
+    password: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+    },
+    token: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     createdAt: {
-       type: DataTypes.DATE,
-       allowNull: false,
-       defaultValue: DataTypes.NOW
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
     },
     updatedAt: {
-       type: DataTypes.DATE,
-       allowNull: false,
-       defaultValue: DataTypes.NOW
-    },
-},{
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+    }
+}, {
     freezeTableName: true
 })
 
