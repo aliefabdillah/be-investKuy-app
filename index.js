@@ -11,6 +11,9 @@ dotenv.config()
 // import { Artikel } from "./src/models/artikel.model.js";
 // import { Faq } from "./src/models/faq.model.js";
 // import Users from "./src/models/users.model.js";
+// import { Pengajuan } from "./src/models/pengajuan.model.js";
+// import { FotoUmkm } from "./src/models/foto_umkm.model.js";
+// import { LaporanKeuangan } from "./src/models/laporan_keuangan.model.js";
 
 
 const app = express();
@@ -35,6 +38,9 @@ app.use(cors({
     // await Artikel.sync();
     // await Faq.sync()
     // await Users.sync()
+    // await Pengajuan.sync()
+    await FotoUmkm.sync()
+    await LaporanKeuangan.sync()
 } catch (error) {
     console.log(error)
 } */
