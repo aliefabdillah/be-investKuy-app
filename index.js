@@ -1,10 +1,16 @@
 import express from "express";
-// import router from "./src/routes/index.route.js";
+import router from "./src/routes/index.route.js";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import db from "./src/configs/db.config.js";
-import { Test } from "./src/models/template.model.js";
+import cookieParser from "cookie-parser";
+import cors from 'cors';
 dotenv.config()
+
+// import { Admin } from "./src/models/admin.model.js";
+// import { Artikel } from "./src/models/artikel.model.js";
+// import { Faq } from "./src/models/faq.model.js";
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -16,17 +22,25 @@ app.use(
   })
 );
 
+app.use(cors({
+    origin: '*',
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))
+
 /* try {
     await db.authenticate();
     // await Test.sync();
+    // await Admin.sync()
+    await Artikel.sync();
+    // await Faq.sync()
 } catch (error) {
     console.log(error)
 } */
 
+
+app.use(router)
+app.use(cookieParser());
 app.use(express.json);
-app.get('/', (req, res) => {
-    res.json({'Message': 'ok'})
-})
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {
