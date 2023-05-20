@@ -62,6 +62,7 @@ async function createArticle(request) {
     var responseSuccess = new ResponseClass.SuccessResponse();
 
     const { title, tgl_terbit, konten } = request.body;
+    const { adminId } = request.cookies
 
     //error handling
     if (!title || !tgl_terbit || !konten) {
@@ -101,7 +102,8 @@ async function createArticle(request) {
             tgl_terbit: tgl_terbit,
             konten: konten,
             filenam: filename,
-            img_url: finalImageUrl
+            img_url: finalImageUrl,
+            adminId: adminId
         });
 
 

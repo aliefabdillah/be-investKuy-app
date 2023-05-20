@@ -33,8 +33,8 @@ async function createFaq(request) {
     var responseError = new ResponseClass.ErrorResponse();
     var responseSuccess = new ResponseClass.SuccessResponse();
 
-    const { question, answer, category, adminId } = request.body;
-    // const adminId = request.cookies['adminId']
+    const { question, answer, category } = request.body;
+    const {adminId} = request.cookies
 
     //error handling
     if (!question || !answer || !category) {
@@ -49,7 +49,7 @@ async function createFaq(request) {
             missingFields.push('answer');
         }
 
-        if (!categories) {
+        if (!category) {
             missingFields.push('categories');
         }
 
@@ -98,7 +98,7 @@ async function updateFaqById(request) {
             missingFields.push('answer');
         }
 
-        if (!categories) {
+        if (!category) {
             missingFields.push('categories');
         }
 

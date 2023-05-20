@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import ResponseClass from '../models/response.model.js';
-import validatePassword from '../models/password.model.js';
+import { validatePassword } from '../models/password.model.js';
 import Users from '../models/users.model.js';
 import jwt from 'jsonwebtoken';
 import { Admin } from '../models/admin.model.js';

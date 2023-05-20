@@ -10,6 +10,7 @@ dotenv.config()
 // import { Admin } from "./src/models/admin.model.js";
 // import { Artikel } from "./src/models/artikel.model.js";
 // import { Faq } from "./src/models/faq.model.js";
+// import Users from "./src/models/users.model.js";
 
 
 const app = express();
@@ -31,8 +32,9 @@ app.use(cors({
     await db.authenticate();
     // await Test.sync();
     // await Admin.sync()
-    await Artikel.sync();
+    // await Artikel.sync();
     // await Faq.sync()
+    // await Users.sync()
 } catch (error) {
     console.log(error)
 } */
