@@ -32,14 +32,30 @@ const getWallet = async (username) => {
         userId: user.id
       },
       attributes: [
-        'balance'
-      ],
+        'id', 'balance'
+      ]
+    });
+
+    const credits = await WalletCredits.findAll({
+      where: {
+        walletId: data.id
+      },
       include: [
         {
-          model: WalletCredits
-        },
+          model: Merchants,
+          as: 'merchantsDetails'
+        }
+      ]
+    });
+
+    const debits = await WalletDebits.findAll({
+      where: {
+        walletId: data.id
+      },
+      include: [
         {
-          model: WalletDebits
+          model: Merchants,
+          as: 'merchantsDetails'
         }
       ]
     });
@@ -50,10 +66,15 @@ const getWallet = async (username) => {
     }
 
     responseSuccess.message = `Successfully retrieving wallet data for user with username ${username}`;
-    responseSuccess.data = data;
+    responseSuccess.data = {
+      ...data['dataValues'],
+      credits: credits,
+      debits: debits
+    };
+    return responseSuccess;
   } catch (error) {
     responseError.code = 500;
-    responseError.message = error;
+    responseError.message = error.message;
     return responseError;
   }
 };
@@ -93,7 +114,7 @@ const createCreditTransaction = async (requestBody) => {
   const responseError = new ResponseClass.ErrorResponse();
 
   if (!walletId || !merchantId) {
-    responseError.message = "walletId oe merchantId is missing!";
+    responseError.message = "walletId or merchantId is missing!";
     return responseError;
   }
 
@@ -122,7 +143,7 @@ const createCreditTransaction = async (requestBody) => {
       transactionCode: transactionCode
     });
 
-    const newBalance = Number(wallet) - Number(amount);
+    const newBalance = Number(wallet.balance) - Number(amount);
 
     await wallet.update({
       balance: newBalance
@@ -149,7 +170,7 @@ const createDebitTransaction = async (requestBody) => {
   const responseError = new ResponseClass.ErrorResponse();
 
   if (!walletId || !merchantId) {
-    responseError.message = "walletId oe merchantId is missing!";
+    responseError.message = "walletId or merchantId is missing!";
     return responseError;
   }
 
@@ -179,7 +200,7 @@ const createDebitTransaction = async (requestBody) => {
       paymentCode: paymentCode
     });
 
-    const newBalance = Number(wallet) + Number(amount);
+    const newBalance = Number(wallet.balance) + Number(amount);
 
     await wallet.update({
       balance: newBalance
@@ -217,7 +238,7 @@ const getAllCreditTransaction = async (walletId) => {
       attributes: [
         'amount', 'transactionCode', 'type', 'createdAt'
       ],
-      include: [{ model: Merchants }]
+      include: [{ model: Merchants, as: 'merchantsDetails' }]
     });
 
     responseSuccess.message = `Successfully retrieving credit transactions for walletId ${walletId}`;
@@ -252,7 +273,7 @@ const getAllDebitTransaction = async (walletId) => {
       attributes: [
         'amount', 'transactionCode', 'paymentCode', 'createdAt'
       ],
-      include: [{ model: Merchants }]
+      include: [{ model: Merchants, as: 'merchantsDetails' }]
     });
 
     responseSuccess.message = `Successfully retrieving debit transactions for walletId ${walletId}`;
@@ -260,7 +281,7 @@ const getAllDebitTransaction = async (walletId) => {
     return responseSuccess;
   } catch (error) {
     responseError.code = 500;
-    responseError.message = error;
+    responseError.message = error.message;
     return responseError;
   }
 };
