@@ -4,6 +4,7 @@ import { LaporanKeuangan } from "../models/laporan_keuangan.model.js"
 import { FotoUmkm } from "../models/foto_umkm.model.js"
 import Users from "../models/users.model.js"
 import { Op } from "sequelize"
+import { Pendanaan } from "../models/pendanaan.model.js"
 
 async function createPengajuan(request){
 
@@ -193,7 +194,7 @@ async function getPengajuanById(request) {
     var responseError = new ResponseClass.ErrorResponse();
     var responseSuccess = new ResponseClass.SuccessResponse();
 
-    const {pengajuanId} = request.params
+    const {userId, pengajuanId} = request.params
 
     try {
         const pengajuanDetails = await Pengajuan.findOne({ 
@@ -207,6 +208,18 @@ async function getPengajuanById(request) {
             ]
         })
 
+        const listInvestor = await Pendanaan.findAll({
+            where: {pengajuanId: pengajuanId, status: "In Progress"},
+            attributes: ['investorId']
+        })
+
+        let isFunded = false
+
+        listInvestor.forEach((investor) => {
+            if (userId == investor.investorId) {
+                is_didanai = true
+            }
+        })
 
         const fotoUmkm = await FotoUmkm.findOne({
             where: {pengajuanId: pengajuanId},
@@ -220,6 +233,7 @@ async function getPengajuanById(request) {
 
         responseSuccess.message = `Get Pengajuan UMKM ${pengajuanDetails.pemilikDetails.name} successfull!`
         responseSuccess.data = {
+            isFunded: isFunded,
             ...pengajuanDetails['dataValues'],
             foto_umkm: fotoUmkm
         }
