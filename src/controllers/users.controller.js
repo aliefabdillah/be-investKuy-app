@@ -10,7 +10,7 @@ const register = async (req, res) => {
   } catch (error) {
     let responseError = new ResponseClass.ErrorResponse();
     responseError.code = 500;
-    responseError.message = error;
+    responseError.message = error.message;
     res.json(responseError);
   }
 };
@@ -56,13 +56,13 @@ const getAllUsers = async (req, res) => {
         [sortColumn, sortOrder]
       ],
       attributes: [
-        'id', 'name', 'username', 'email', 'no_telepon', 'alamat', 'role', 'isVerified', 'img_url'
+        'id', 'name', 'username', 'email', 'no_telepon', 'alamat', 'role', 'is_verified'
       ]
     });
 
     responseSuccess.message = "Successfully getting all users data.";
     responseSuccess.data = users;
-    return responseSuccess;
+    res.json(responseSuccess);
   } catch (error) {
     responseError.code = 500;
     responseError.message = error;
