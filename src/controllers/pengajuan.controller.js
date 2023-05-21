@@ -20,7 +20,7 @@ const updateById= async(req, res, next) => {
 
 const getAll = async (req,res, next) => {
     try {
-        res.json(await pengajuanService.getAllPengajuan(req.query))
+        res.json(await pengajuanService.getAllPengajuan(req))
     } catch (error) {
         console.log(error)
         next(error)
