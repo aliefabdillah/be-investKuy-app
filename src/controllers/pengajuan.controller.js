@@ -18,6 +18,15 @@ const updateById= async(req, res, next) => {
     }
 }
 
+const getAll = async (req,res, next) => {
+    try {
+        res.json(await pengajuanService.getAllPengajuan(req.query))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 const getRiwayat = async(req, res, next) => {
     try {
         res.json(await pengajuanService.getRiwayatPengajuan(req))
@@ -30,6 +39,15 @@ const getRiwayat = async(req, res, next) => {
 const getById = async(req, res, next) => {
     try {
         res.json(await pengajuanService.getPengajuanById(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+const getLaporan = async(req, res, next) => {
+    try {
+        res.json(await pengajuanService.getLaporanKeuangan(req))
     } catch (error) {
         console.log(error)
         next(error)
@@ -60,5 +78,7 @@ export default {
     getRiwayat,
     getById,
     cancel,
-    addLaporanKeuangan
+    addLaporanKeuangan,
+    getAll,
+    getLaporan
 }
