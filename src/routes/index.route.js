@@ -4,6 +4,7 @@ import articleController from "../controllers/article.controller.js";
 import usersController from "../controllers/users.controller.js";
 import adminController from "../controllers/admin.controller.js";
 import pengajuanController from "../controllers/pengajuan.controller.js";
+import verificationController from "../controllers/verification.controller.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
 import verifyTokenMiddleware from "../middlewares/verifyToken.middleware.js";
 const router = express.Router();
@@ -56,4 +57,15 @@ router.post(
     pengajuanController.addLaporanKeuangan
 );
 router.put('/pengajuan/cancel/:pengajuanId', pengajuanController.cancel)
+
+/* Verification */
+router.post(
+    '/verification/:username', 
+    cloudinaryConfig.uploadVerification.any([{name:'ktpImg'}, {name: 'pasFoto'}]),
+    verificationController.create
+);
+
+router.get('/verification', verificationController.getAll)  //sisi admin
+router.get('/verification/:verificationId', verificationController.getById) // sisi admin
+router.put('/verification/:verificationId/:verifiedStatus', verificationController.updateVerified)
 export default router;
