@@ -51,7 +51,7 @@ try {
     // await Merchants.sync()
     // await Wallets.sync()
     // await walletCredits.sync()
-    await WalletDebits.sync()
+    // await WalletDebits.sync()
 } catch (error) {
     console.log(error)
 }

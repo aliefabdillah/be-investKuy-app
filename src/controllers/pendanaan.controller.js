@@ -1,4 +1,4 @@
-import pendanaanService from "../services/pendanaan.service";
+import pendanaanService from "../services/pendanaan.service.js";
 
 const create = async (req, res, next) => {
     try {
@@ -9,6 +9,16 @@ const create = async (req, res, next) => {
     }
 }
 
+const cancel = async (req, res, next) => {
+    try {
+        res.json(await pendanaanService.cancelPendanaan(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 export default {
-    create
+    create,
+    cancel
 }

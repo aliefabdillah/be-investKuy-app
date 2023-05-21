@@ -6,6 +6,7 @@ import adminController from "../controllers/admin.controller.js";
 import pengajuanController from "../controllers/pengajuan.controller.js";
 import verificationController from "../controllers/verification.controller.js";
 import walletController from "../controllers/wallet.controller.js";
+import pendanaanController from "../controllers/pendanaan.controller.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
 import verifyTokenMiddleware from "../middlewares/verifyToken.middleware.js";
 const router = express.Router();
@@ -80,5 +81,9 @@ router.get('/wallet/debits/:walletId', verifyTokenMiddleware.verifyTokenUser, wa
 router.get('/wallet/credits/:walletId', verifyTokenMiddleware.verifyTokenUser, walletController.getAllCreditTransactions);
 router.post('/wallet/debits', verifyTokenMiddleware.verifyTokenUser, walletController.createDebitTransaction);
 router.post('/wallet/credits', verifyTokenMiddleware.verifyTokenUser, walletController.createCreditTransaction);
+
+/* Pendanaan Investor */
+router.post('/pendanaan/:pengajuanId/:userId', pendanaanController.create)
+router.put('/pendanaan/cancel/:pengajuanId/:userId', pendanaanController.cancel)
 
 export default router;

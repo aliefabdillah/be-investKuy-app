@@ -1,6 +1,8 @@
-import { Pendanaan } from "../models/pendanaan.model";
-import { Pengajuan } from "../models/pengajuan.model";
+import { where } from "sequelize";
+import { Pendanaan } from "../models/pendanaan.model.js";
+import { Pengajuan } from "../models/pengajuan.model.js";
 import ResponseClass from "../models/response.model.js"
+import Wallets from "../models/wallet.model.js";
 
 async function createPendanaan(request) {
     let responseSuccess = new ResponseClass.SuccessResponse()
@@ -13,7 +15,7 @@ async function createPendanaan(request) {
         //ambil data plafond. tenor, dan bagi_hasil
         const pengajuanData = await Pengajuan.findOne({ 
             where: {id: pengajuanId}, 
-            attributes:['plafond', 'tenor', 'bagi_hasil']
+            attributes:['id', 'plafond', 'tenor', 'bagi_hasil', 'jml_pendanaan']
         })
 
         //cek pengajuan
@@ -33,8 +35,24 @@ async function createPendanaan(request) {
             investorId: userId,
         })
 
-        // TODO : PENGURANGAN SALDO DI INVESTOR DAN PENAMBAHAN JML_PENDANAAN DI PENGAJUAN
+        // PENGURANGAN SALDO DI INVESTOR DAN PENAMBAHAN JML_PENDANAAN DI PENGAJUAN
+        const currentWallet = await Wallets.findOne({where: {userId: userId}, attributes:['id','balance']})
 
+        if (!currentWallet) {
+            responseError.message = "Wallet Not Found"
+            return responseError
+        }
+
+        if (currentWallet.balance <= nominal) {
+            responseError.message = "Saldo aja tidak mencukupi!"
+            return responseError
+        }
+
+        currentWallet.balance -= nominal
+        currentWallet.save()
+        pengajuanData.jml_pendanaan += nominal
+        pengajuanData.save()
+       
         responseSuccess.message = "Pendanaan berhasil dibuat!"
         responseSuccess.data = newPendanaan
         return responseSuccess
@@ -73,9 +91,22 @@ async function cancelPendanaan(request) {
         existingPendanaan.status = "Canceled"
         existingPendanaan.save()
 
-        // TODO : PENGEMBALIAN SALDO KE INVESTOR DAN PENGURANGAN JUMLAH PENDANAAN DI PENGAJUAN
+        // PENGEMBALIAN SALDO KE INVESTOR DAN PENGURANGAN JUMLAH PENDANAAN DI PENGAJUAN
+        const pengajuanData = await Pengajuan.findOne({ where: {id: pengajuanId}, attributes:['id', 'jml_pendanaan']})
 
-        responseSuccess.message = "Delete pendanaan successfull!"
+        const currentWallet = await Wallets.findOne({where: {userId: userId}, attributes:['id','balance']})
+
+        if (!currentWallet) {
+            responseError.message = "Wallet Not Found"
+            return responseError
+        }
+
+        currentWallet.balance += existingPendanaan.nominal
+        currentWallet.save()
+        pengajuanData.jml_pendanaan -= existingPendanaan.nominal
+        pengajuanData.save()
+
+        responseSuccess.message = "Canceled pendanaan successfull!"
         return responseSuccess
     } catch (error) {
         console.log(error.message)
