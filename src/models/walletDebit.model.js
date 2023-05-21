@@ -1,5 +1,7 @@
 import { DataTypes } from 'sequelize';
 import db from '../configs/db.config.js';
+import Wallets from './wallet.model.js';
+import Merchants from './merchant.model.js';
 
 const WalletDebits = db.define('t_wallet_debits', {
   id: {
@@ -39,9 +41,21 @@ const WalletDebits = db.define('t_wallet_debits', {
 //   foreignKey: 'merchantId'
 // });
 
-WalletDebits.associate = function (models) {
+/* WalletDebits.associate = function (models) {
   this.belongsTo(models.t_wallets, { foreignKey: 'walletId' });
   this.belongsTo(models.t_merchants, { foreignKey: 'merchantId' });
-};
+}; */
+
+WalletDebits.belongsTo(Wallets, {
+  foreignKey: 'walletId',
+  as: 'wallletDebitsDetails',
+  onDelete: 'CASCADE'
+})
+
+WalletDebits.belongsTo(Merchants, {
+  foreignKey: 'merchantId',
+  as: 'merchantsDetails',
+  onDelete: 'CASCADE'
+})
 
 export default WalletDebits;

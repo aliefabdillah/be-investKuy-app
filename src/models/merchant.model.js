@@ -34,9 +34,9 @@ const Merchants = db.define('t_merchants', {
 //   foreignKey: 'merchantId'
 // });
 
-Merchants.associate = function (models) {
+/* Merchants.associate = function (models) {
   this.hasMany(models.t_wallet_credits, { foreignKey: 'merchantId' });
   this.hasMany(models.t_wallet_debits, { foreignKey: 'merchantId' });
-};
+}; */
 
 export default Merchants;

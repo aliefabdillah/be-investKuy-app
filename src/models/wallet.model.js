@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import db from '../configs/db.config.js';
+import Users from './users.model.js';
 
 const Wallets = db.define('t_wallets', {
   id: {
@@ -35,10 +36,16 @@ const Wallets = db.define('t_wallets', {
 //   foreignKey: 'walletId'
 // });
 
-Wallets.associate = function (models) {
+/* Wallets.associate = function (models) {
   this.belongsTo(models.t_users, { foreignKey: 'userId' });
   this.hasMany(models.t_wallet_debits, { foreignKey: 'walletId' });
   this.hasMany(models.t_wallet_credits, { foreignKey: 'walletId' });
-};
+}; */
 
+
+Wallets.belongsTo(Users, {
+  foreignKey: 'userId',
+  as: 'walletsDetails',
+  onDelete: 'CASCADE'
+})
 export default Wallets;

@@ -1,4 +1,4 @@
-import walletService from "../services/wallet.service";
+import walletService from "../services/wallet.service.js";
 
 const getWallet = async (req, res) => {
   try {

@@ -11,7 +11,10 @@ dotenv.config()
 // import { Artikel } from "./src/models/artikel.model.js";
 // import { Faq } from "./src/models/faq.model.js";
 // import Users from "./src/models/users.model.js";
-
+// import Merchants from "./src/models/merchant.model.js";
+// import Wallets from "./src/models/wallet.model.js";
+import WalletDebits from "./src/models/walletDebit.model.js";
+// import walletCredits from "./src/models/walletCredit.model.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -28,16 +31,20 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
-/* try {
+try {
     await db.authenticate();
     // await Test.sync();
     // await Admin.sync()
     // await Artikel.sync();
     // await Faq.sync()
     // await Users.sync()
+    // await Merchants.sync()
+    // await Wallets.sync()
+    // await walletCredits.sync()
+    await WalletDebits.sync()
 } catch (error) {
     console.log(error)
-} */
+}
 
 
 app.use(router)
