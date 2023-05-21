@@ -67,7 +67,7 @@ const registerUser = async (requestBody) => {
     return responseError;
   }
 
-  const salt = bcrypt.genSalt();
+  const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
 
   try {
@@ -77,7 +77,7 @@ const registerUser = async (requestBody) => {
       username,
       role
     }, process.env.USER_TOKEN_SECRET, {
-      expiresIn: 0
+      expiresIn: '100y'
     });
 
     const data = await Users.create({
@@ -222,7 +222,7 @@ const registerAdmin = async (requestBody) => {
     return responseError;
   }
 
-  const salt = bcrypt.genSalt();
+  const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
 
   // TODO CHANGE TOKEN TO ACCESS TOKEN AND REFRESH TOKEN
@@ -235,7 +235,7 @@ const registerAdmin = async (requestBody) => {
         username,
         role
       }, process.env.ADMIN_TOKEN_SECRET, {
-        expiresIn: 0
+        expiresIn: '100y'
       });
     } else {
       token = jwt.sign({
@@ -244,7 +244,7 @@ const registerAdmin = async (requestBody) => {
         username,
         role
       }, process.env.CS_TOKEN_SECRET, {
-        expiresIn: 0
+        expiresIn: '100y'
       });
     }
 
