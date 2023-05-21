@@ -20,23 +20,7 @@ const storageArticlesImg = new CloudinaryStorage({
     } 
 });
 
-const storagePengajuan = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'pengajuan'
-    }
-})
-
-const storageVerification = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'verification'
-    }
-})
-
 const uploadArticleImg = multer({ storage: storageArticlesImg })
-const uploadPengajuan = multer({ storage: storagePengajuan })
-const uploadVerification = multer({ storage: storageVerification})
 
 const deleteFile = async (filename) => {
     try {
@@ -57,7 +41,5 @@ const deleteFile = async (filename) => {
 
 export default {
     uploadArticleImg,
-    uploadPengajuan,
-    uploadVerification,
     deleteFile,
 }
