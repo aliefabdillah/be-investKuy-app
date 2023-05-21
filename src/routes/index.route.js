@@ -59,7 +59,7 @@ router.post(
 router.put('/pengajuan/:pengajuanId/cancel', pengajuanController.cancel)        //UMKM
 
 /* Pengajuan Investor */
-router.get('/pengajuan', pengajuanController.getAll)                                    //Investor
+router.get('/pengajuan/:page', pengajuanController.getAll)                                    //Investor
 router.get('/pengajuan/:pengajuanId/laporan-keuangan', pengajuanController.getLaporan)  //investor
 
 /* Verification */

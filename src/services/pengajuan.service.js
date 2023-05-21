@@ -3,6 +3,7 @@ import { Pengajuan } from "../models/pengajuan.model.js"
 import { LaporanKeuangan } from "../models/laporan_keuangan.model.js"
 import { FotoUmkm } from "../models/foto_umkm.model.js"
 import Users from "../models/users.model.js"
+import { Op } from "sequelize"
 
 async function createPengajuan(request){
 
@@ -283,13 +284,53 @@ async function cancelPengajuan(request){
     }
 }
 
-async function getAllPengajuan(query) {
+async function getAllPengajuan(req) {
     var responseError = new ResponseClass.ErrorResponse();
     var responseSuccess = new ResponseClass.SuccessResponse();
 
-    try {
+    try {   
+        //pagination
+        const pageNumber = req.params.page ? parseInt(req.params.page, 10) : 1
+        const itemsPerPage = req.query.pageSize ? parseInt(req.query.pageSize, 10) : 10
+ 
+        const offset = (pageNumber - 1) * itemsPerPage;
+        const limit = itemsPerPage
+
+        //query dan sort
+        const wherePengajuan = {};
+        const sortColumn = req.query.sort ? req.query.sort : 'jml_pendanaan';
+        const sortOrder = req.query.order ? req.query.order : 'DESC';
+
+        wherePengajuan.status = {
+            [Op.like]: `%In Progress%`
+        };
+
+        if (req.query.sektor) {
+            wherePengajuan.sektor = {
+              [Op.like]: `%${req.query.sektor}%`
+            };
+        }
+      
+        if (req.query.tenor) {
+            wherePengajuan.tenor = {
+                [Op.like]: `%${req.query.tenor}%`
+            };
+        }
+
+        if (req.query.plafond) {
+            wherePengajuan.plafond = {
+                [Op.like]: `%${req.query.plafond}%`
+            };
+        }
+
+        if (req,query.lokasi) {
+            wherePengajuan.alamat = {
+                [Op.like]: `%${req.query.lokasi}%`
+            }
+        }
+
         const pengajuanResult = await Pengajuan.findAll({
-            where: {status: "In Progress"},
+            where: wherePengajuan,
             include:[
                 {
                     model: Users,
@@ -297,6 +338,11 @@ async function getAllPengajuan(query) {
                     attributes: ['name', 'alamat']
                 }
             ],
+            order:[
+                [sortColumn, sortOrder]
+            ],
+            offset: offset,
+            limit: limit,
             attributes: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir']
         })
 
