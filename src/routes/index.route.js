@@ -26,46 +26,51 @@ router.get('/admin/users', verifyTokenMiddleware.verifyTokenAdmin, usersControll
 router.get('/cs/users', verifyTokenMiddleware.verifyTokenCustomerService, usersController.getAllUsers);
 
 /* FAQ */
-router.get('/faq', faqController.get);
-router.post('/faq', faqController.create);
-router.put('/faq/:faqId', faqController.update);
-router.delete('/faq/:faqId', faqController.deleteById);
+router.get('/faq', faqController.get);                      //users
+router.post('/faq', faqController.create);                  //admin
+router.put('/faq/:faqId', faqController.update);            //admin
+router.delete('/faq/:faqId', faqController.deleteById);     //admin
 
 /* Articles */
-router.get('/articles', articleController.getAll);
-router.get('/articles/:articleId', articleController.getById);
-router.post('/articles', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.create);
-router.put('/articles/:articleId', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.update);
-router.delete('/articles/:articleId', articleController.deleteById);
+router.get('/articles', articleController.getAll);                  //users
+router.get('/articles/:articleId', articleController.getById);      //users
+router.post('/articles', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.create);            //admin
+router.put('/articles/:articleId', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.update);  //admin
+router.delete('/articles/:articleId', articleController.deleteById);                                                //admin
 
 /* Pengajuan */
 router.post(
     '/pengajuan', 
     cloudinaryConfig.uploadPengajuan.any([{name:'image1'},{name:'image2'},{name:'image3'},{name:'laporan'}])
     ,pengajuanController.create
-);
+);             //UMKM
 router.put(
     '/pengajuan/:pengajuanId', 
     cloudinaryConfig.uploadPengajuan.any([{name:'image1'},{name:'image2'},{name:'image3'}])
     ,pengajuanController.updateById
-);
-router.get('/riwayat-pengajuan/:username', pengajuanController.getRiwayat)
-router.get('/pengajuan/:pengajuanId', pengajuanController.getById)
+);              //UMKM
+router.get('/riwayat-pengajuan/:username', pengajuanController.getRiwayat)      //UMKM
+router.get('/pengajuan/:pengajuanId', pengajuanController.getById)              //UMKM
 router.post(
-    '/pengajuan/tambah-laporan/:pengajuanId', 
+    '/pengajuan/:pengajuanId/tambah-laporan', 
     cloudinaryConfig.uploadPengajuan.single('laporan'), 
     pengajuanController.addLaporanKeuangan
-);
-router.put('/pengajuan/cancel/:pengajuanId', pengajuanController.cancel)
+);                                                                              //UMKM
+router.put('/pengajuan/:pengajuanId/cancel', pengajuanController.cancel)        //UMKM
+
+/* Pengajuan Investor */
+router.get('/pengajuan', pengajuanController.getAll)                                    //Investor
+router.get('/pengajuan/:pengajuanId/laporan-keuangan', pengajuanController.getLaporan)  //investor
 
 /* Verification */
 router.post(
     '/verification/:username', 
     cloudinaryConfig.uploadVerification.any([{name:'ktpImg'}, {name: 'pasFoto'}]),
     verificationController.create
-);
+);          //USERS
 
 router.get('/verification', verificationController.getAll)  //sisi admin
 router.get('/verification/:verificationId', verificationController.getById) // sisi admin
-router.put('/verification/:verificationId/:verifiedStatus', verificationController.updateVerified)
+router.put('/verification/:verificationId/:verifiedStatus', verificationController.updateVerified)      //sisi admin
+
 export default router;

@@ -74,6 +74,6 @@ export const Pengajuan = db.define("t_pengajuan", {
 
 Pengajuan.belongsTo(Users, {
     foreignKey: 'pemilikId',
-    as: 'pengajuanDetails',
+    as: 'pemilikDetails',
     onDelete: 'CASCADE'
 })

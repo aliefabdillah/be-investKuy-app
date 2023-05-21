@@ -197,7 +197,15 @@ async function getPengajuanById(request) {
     try {
         const pengajuanDetails = await Pengajuan.findOne({ 
             where: {id: pengajuanId},
+            include: [
+                {
+                    model: Users,
+                    as: "pemilikDetails",
+                    attributes: ['name', 'alamat']
+                }
+            ]
         })
+
 
         const fotoUmkm = await FotoUmkm.findOne({
             where: {pengajuanId: pengajuanId},
@@ -209,14 +217,8 @@ async function getPengajuanById(request) {
             return responseError
         }
 
-        const pedagang = await Users.findOne({
-            where: {id: pengajuanDetails.pemilikId},
-            attributes: ['name']
-        })
-
-        responseSuccess.message = `Get Pengajuan UMKM ${pedagang.name} successfull!`
+        responseSuccess.message = `Get Pengajuan UMKM ${pengajuanDetails.pemilikDetails.name} successfull!`
         responseSuccess.data = {
-            nama_pedagang: pedagang.name,
             ...pengajuanDetails['dataValues'],
             foto_umkm: fotoUmkm
         }
@@ -281,6 +283,61 @@ async function cancelPengajuan(request){
     }
 }
 
+async function getAllPengajuan(query) {
+    var responseError = new ResponseClass.ErrorResponse();
+    var responseSuccess = new ResponseClass.SuccessResponse();
+
+    try {
+        const pengajuanResult = await Pengajuan.findAll({
+            where: {status: "In Progress"},
+            include:[
+                {
+                    model: Users,
+                    as: "pemilikDetails",
+                    attributes: ['name', 'alamat']
+                }
+            ],
+            attributes: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir']
+        })
+
+        responseSuccess.message = "Get all pengajuan successfull!"
+        responseSuccess.data = pengajuanResult
+        return responseSuccess
+
+    } catch (error) {
+        console.log(error)
+        responseError.message = "Get pengajuan from database error!"
+        return responseError
+    }
+}
+
+async function getLaporanKeuangan(request){
+    var responseError = new ResponseClass.ErrorResponse();
+    var responseSuccess = new ResponseClass.SuccessResponse();
+
+    const { pengajuanId } = request.params
+
+    try {
+        const laporanResult = await LaporanKeuangan.findAll({
+            where: {pengajuanId: pengajuanId},
+            attributes: ['id', 'laporan_url']
+        })
+
+        if (!laporanResult) {
+            responseSuccess.message = "Laporan Keuangan is not found"
+            return responseSuccess
+        }
+
+        responseSuccess.message = "get laporan keuangan successfull!"
+        responseSuccess.data = laporanResult
+        return responseSuccess
+    } catch (error) {
+        console.log(error)
+        responseError.message = "Get pengajuan from database error!"
+        return responseError
+    }
+}
+
 export default {
     createPengajuan,
     updatePengajuanById,
@@ -288,4 +345,7 @@ export default {
     getPengajuanById,
     addLaporanKeuangan,
     cancelPengajuan,
+    getAllPengajuan,
+    getLaporanKeuangan,
+    
 }
