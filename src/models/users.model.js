@@ -1,7 +1,5 @@
-import { Sequelize } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import db from '../configs/db.config.js';
-
-const { DataTypes } = Sequelize;
 
 const Users = db.define('t_users', {
   id: {
@@ -53,5 +51,13 @@ const Users = db.define('t_users', {
     },
   },
 });
+
+// Users.hasOne(Wallets, {
+//   foreignKey: 'userId'
+// });
+
+Users.associate = function (models) {
+  this.hasOne(models.t_wallets, { foreignKey: 'userId' });
+};
 
 export default Users;

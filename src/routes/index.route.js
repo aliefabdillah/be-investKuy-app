@@ -3,6 +3,7 @@ import faqController from "../controllers/faq.controller.js";
 import articleController from "../controllers/article.controller.js";
 import usersController from "../controllers/users.controller.js";
 import adminController from "../controllers/admin.controller.js";
+import walletController from "../controllers/wallet.controller.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
 import verifyTokenMiddleware from "../middlewares/verifyToken.middleware.js";
 const router = express.Router();
@@ -35,5 +36,12 @@ router.get('/articles/:articleId', articleController.getById);
 router.post('/articles', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.create);
 router.put('/articles/:articleId', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.update);
 router.delete('/articles/:articleId', articleController.deleteById);
+
+/* Wallet */
+router.get('/wallet/:username', verifyTokenMiddleware.verifyTokenUser, walletController.getWallet);
+router.get('/wallet/debits/:walletId', verifyTokenMiddleware.verifyTokenUser, walletController.getAllDebitTransactions);
+router.get('/wallet/credits/:walletId', verifyTokenMiddleware.verifyTokenUser, walletController.getAllCreditTransactions);
+router.post('/wallet/debits', verifyTokenMiddleware.verifyTokenUser, walletController.createDebitTransaction);
+router.post('/wallet/credits', verifyTokenMiddleware.verifyTokenUser, walletController.createCreditTransaction);
 
 export default router;

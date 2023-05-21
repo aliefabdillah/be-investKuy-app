@@ -4,12 +4,18 @@ import { validatePassword } from '../models/password.model.js';
 import Users from '../models/users.model.js';
 import jwt from 'jsonwebtoken';
 import { Admin } from '../models/admin.model.js';
+import walletService from './wallet.service.js';
 
+/**
+ * 
+ * @param {Object} requestBody 
+ * @returns
+ */
 const registerUser = async (requestBody) => {
   const { username, email, password, confirmPassword, pin, name, role } = requestBody;
 
-  let responseError = new ResponseClass.ErrorResponse();
-  let responseSuccess = new ResponseClass.SuccessResponse();
+  const responseError = new ResponseClass.ErrorResponse();
+  const responseSuccess = new ResponseClass.SuccessResponse();
 
   // checking if email, username, password, or pin is empty
   if (
@@ -84,6 +90,12 @@ const registerUser = async (requestBody) => {
       token: token
     });
 
+    const walletResponse = await walletService.createWallet(data.id);
+    if (walletResponse.code !== 200) {
+      responseError.code = walletResponse.code;
+      responseError.message = walletResponse.message;
+      return responseError;
+    }
 
     responseSuccess.message = "Successfully registered.";
     responseSuccess.data = {
@@ -101,6 +113,11 @@ const registerUser = async (requestBody) => {
   }
 };
 
+/**
+ * 
+ * @param {Object} requestBody 
+ * @returns
+ */
 const loginUser = async (requestBody) => {
   const { username, password } = requestBody;
   let responseError = new ResponseClass.ErrorResponse();
@@ -144,6 +161,11 @@ const loginUser = async (requestBody) => {
   return responseSuccess;
 };
 
+/**
+ * 
+ * @param {Object} requestBody 
+ * @returns
+ */
 const registerAdmin = async (requestBody) => {
   const { name, username, email, password, confirmPassword, role } = requestBody;
 
@@ -251,6 +273,11 @@ const registerAdmin = async (requestBody) => {
   }
 };
 
+/**
+ * 
+ * @param {Object} requestBody 
+ * @returns
+ */
 const loginAdmin = async (requestBody) => {
   const { username, password } = requestBody;
   let responseError = new ResponseClass.ErrorResponse();
