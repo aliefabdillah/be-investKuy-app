@@ -14,6 +14,7 @@ dotenv.config()
 // import { Pengajuan } from "./src/models/pengajuan.model.js";
 // import { FotoUmkm } from "./src/models/foto_umkm.model.js";
 // import { LaporanKeuangan } from "./src/models/laporan_keuangan.model.js";
+// import {Verification} from "./src/models/verification.model.js";
 
 
 const app = express();
@@ -39,8 +40,9 @@ app.use(cors({
     // await Faq.sync()
     // await Users.sync()
     // await Pengajuan.sync()
-    await FotoUmkm.sync()
-    await LaporanKeuangan.sync()
+    // await FotoUmkm.sync()
+    // await LaporanKeuangan.sync()
+    await Verification.sync()
 } catch (error) {
     console.log(error)
 } */
