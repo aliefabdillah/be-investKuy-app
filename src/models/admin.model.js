@@ -30,6 +30,10 @@ export const Admin = db.define("t_admins", {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    role: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     createdAt: {
         type: DataTypes.DATE,
         allowNull: false,

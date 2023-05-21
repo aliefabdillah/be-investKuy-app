@@ -16,7 +16,10 @@ dotenv.config()
 // import { LaporanKeuangan } from "./src/models/laporan_keuangan.model.js";
 // import {Verification} from "./src/models/verification.model.js";
 // import { Pendanaan } from "./src/models/pendanaan.model.js";
-
+// import Merchants from "./src/models/merchant.model.js";
+// import Wallets from "./src/models/wallet.model.js";
+import WalletDebits from "./src/models/walletDebit.model.js";
+// import walletCredits from "./src/models/walletCredit.model.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -33,7 +36,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
-/* try {
+try {
     await db.authenticate();
     // await Test.sync();
     // await Admin.sync()
@@ -45,9 +48,13 @@ app.use(cors({
     // await LaporanKeuangan.sync()
     // await Verification.sync()
     // await Pendanaan.sync()
+    // await Merchants.sync()
+    // await Wallets.sync()
+    // await walletCredits.sync()
+    await WalletDebits.sync()
 } catch (error) {
     console.log(error)
-} */
+}
 
 
 app.use(router)
