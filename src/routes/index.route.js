@@ -4,6 +4,8 @@ import articleController from "../controllers/article.controller.js";
 import usersController from "../controllers/users.controller.js";
 import adminController from "../controllers/admin.controller.js";
 import walletController from "../controllers/wallet.controller.js";
+import merchantController from "../controllers/merchant.controller.js";
+import rekeningController from "../controllers/rekening.controller.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
 import verifyTokenMiddleware from "../middlewares/verifyToken.middleware.js";
 const router = express.Router();
@@ -36,6 +38,20 @@ router.get('/articles/:articleId', articleController.getById);
 router.post('/articles', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.create);
 router.put('/articles/:articleId', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.update);
 router.delete('/articles/:articleId', articleController.deleteById);
+
+/* Merchant */
+router.get('/merchants', merchantController.get);
+router.get('/merchants/:id', merchantController.getById);
+router.post('/merchants', verifyTokenMiddleware.verifyTokenAdmin, merchantController.create);
+router.put('/merchants/:id', verifyTokenMiddleware.verifyTokenAdmin, merchantController.update);
+router.delete('/merchants/:id', verifyTokenMiddleware.verifyTokenAdmin, merchantController.deleteById);
+
+/* Rekening */
+router.get('/rekenings/:userId', verifyTokenMiddleware.verifyTokenUser, rekeningController.get);
+router.get('/rekenings/id/:id', verifyTokenMiddleware.verifyTokenUser, rekeningController.getById);
+router.post('/rekenings', verifyTokenMiddleware.verifyTokenUser, rekeningController.create);
+router.put('/rekenings/:id', verifyTokenMiddleware.verifyTokenUser, rekeningController.update);
+router.delete('/rekenings/:id', verifyTokenMiddleware.verifyTokenUser, rekeningController.deleteById);
 
 /* Wallet */
 router.get('/wallet/:username', verifyTokenMiddleware.verifyTokenUser, walletController.getWallet);
