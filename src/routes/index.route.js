@@ -87,4 +87,9 @@ router.post('/wallet/credits', verifyTokenMiddleware.verifyTokenUser, walletCont
 router.post('/pendanaan/:pengajuanId/:userId', pendanaanController.create)
 router.put('/pendanaan/cancel/:pengajuanId/:userId', pendanaanController.cancel)
 
+/* Profile Users */
+router.get('/user/profile/:userId', usersController.getUsersProfile)
+router.put('/user/profile/ubah-info-akun/:userId', cloudinaryConfig.uploadImageProfile.single("img_profile"), usersController.updateInfoAkun)
+router.put('/user/profile/ubah-password/:userId', usersController.updatePass)
+router.put('/user/profile/ubah-pin/:userId', usersController.updatePin)
 export default router;

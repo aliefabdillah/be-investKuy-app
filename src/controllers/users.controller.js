@@ -2,6 +2,7 @@ import AuthService from '../services/auth.service.js';
 import ResponseClass from '../models/response.model.js';
 import { Op } from 'sequelize';
 import Users from '../models/users.model.js';
+import profileService from '../services/profile.service.js';
 
 const register = async (req, res) => {
   try {
@@ -70,8 +71,48 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getUsersProfile = async (req, res, next) => {
+  try {
+    res.json(await profileService.getProfile(req))
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
+const updateInfoAkun = async (req, res, next) => {
+  try {
+    res.json(await profileService.updateInfoAkun(req))
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
+const updatePass = async (req, res, next) => {
+  try {
+    res.json(await profileService.updatePassword(req))
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
+const updatePin = async (req, res, next) => {
+  try {
+    res.json(await profileService.updatePin(req))
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 export default {
   register,
   login,
-  getAllUsers
+  getAllUsers,
+  getUsersProfile,
+  updateInfoAkun,
+  updatePass,
+  updatePin,
 };
