@@ -11,6 +11,11 @@ dotenv.config()
 // import { Artikel } from "./src/models/artikel.model.js";
 // import { Faq } from "./src/models/faq.model.js";
 // import Users from "./src/models/users.model.js";
+// import { Pengajuan } from "./src/models/pengajuan.model.js";
+// import { FotoUmkm } from "./src/models/foto_umkm.model.js";
+// import { LaporanKeuangan } from "./src/models/laporan_keuangan.model.js";
+// import {Verification} from "./src/models/verification.model.js";
+// import { Pendanaan } from "./src/models/pendanaan.model.js";
 // import Merchants from "./src/models/merchant.model.js";
 // import Wallets from "./src/models/wallet.model.js";
 import WalletDebits from "./src/models/walletDebit.model.js";
@@ -38,6 +43,11 @@ try {
     // await Artikel.sync();
     // await Faq.sync()
     // await Users.sync()
+    // await Pengajuan.sync()
+    // await FotoUmkm.sync()
+    // await LaporanKeuangan.sync()
+    // await Verification.sync()
+    // await Pendanaan.sync()
     // await Merchants.sync()
     // await Wallets.sync()
     // await walletCredits.sync()
