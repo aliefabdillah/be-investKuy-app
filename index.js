@@ -18,8 +18,9 @@ dotenv.config()
 // import { Pendanaan } from "./src/models/pendanaan.model.js";
 // import Merchants from "./src/models/merchant.model.js";
 // import Wallets from "./src/models/wallet.model.js";
-import WalletDebits from "./src/models/walletDebit.model.js";
+// import WalletDebits from "./src/models/walletDebit.model.js";
 // import walletCredits from "./src/models/walletCredit.model.js";
+// import Rekening from "./src/models/rekening.model.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -52,6 +53,7 @@ try {
     // await Wallets.sync()
     // await walletCredits.sync()
     // await WalletDebits.sync()
+    // await Rekening.sync()
 } catch (error) {
     console.log(error)
 }
