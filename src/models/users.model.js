@@ -22,7 +22,7 @@ const Users = db.define('t_users', {
     type: DataTypes.STRING
   },
   pin: {
-    type: DataTypes.INTEGER
+    type: DataTypes.STRING
   },
   no_telepon: {
     type: DataTypes.STRING
@@ -39,6 +39,12 @@ const Users = db.define('t_users', {
     defaultValue: false
   },
   token: {
+    type: DataTypes.STRING
+  },
+  img_url:{
+    type: DataTypes.STRING,
+  },
+  img_filename:{
     type: DataTypes.STRING
   }
 }, {
