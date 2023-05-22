@@ -6,6 +6,8 @@ import adminController from "../controllers/admin.controller.js";
 import pengajuanController from "../controllers/pengajuan.controller.js";
 import verificationController from "../controllers/verification.controller.js";
 import walletController from "../controllers/wallet.controller.js";
+import merchantController from "../controllers/merchant.controller.js";
+import rekeningController from "../controllers/rekening.controller.js";
 import pendanaanController from "../controllers/pendanaan.controller.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
 import verifyTokenMiddleware from "../middlewares/verifyToken.middleware.js";
@@ -76,6 +78,20 @@ router.get('/verification', verificationController.getAll)  //sisi admin
 router.get('/verification/:verificationId', verificationController.getById) // sisi admin
 router.put('/verification/:verificationId/:verifiedStatus', verificationController.updateVerified)      //sisi admin
 
+/* Merchant */
+router.get('/merchants', merchantController.get);
+router.get('/merchants/:id', merchantController.getById);
+router.post('/merchants', verifyTokenMiddleware.verifyTokenAdmin, merchantController.create);
+router.put('/merchants/:id', verifyTokenMiddleware.verifyTokenAdmin, merchantController.update);
+router.delete('/merchants/:id', verifyTokenMiddleware.verifyTokenAdmin, merchantController.deleteById);
+
+/* Rekening */
+router.get('/rekenings/:userId', verifyTokenMiddleware.verifyTokenUser, rekeningController.get);
+router.get('/rekenings/id/:id', verifyTokenMiddleware.verifyTokenUser, rekeningController.getById);
+router.post('/rekenings', verifyTokenMiddleware.verifyTokenUser, rekeningController.create);
+router.put('/rekenings/:id', verifyTokenMiddleware.verifyTokenUser, rekeningController.update);
+router.delete('/rekenings/:id', verifyTokenMiddleware.verifyTokenUser, rekeningController.deleteById);
+
 /* Wallet */
 router.get('/wallet/:username', verifyTokenMiddleware.verifyTokenUser, walletController.getWallet);
 router.get('/wallet/debits/:walletId', verifyTokenMiddleware.verifyTokenUser, walletController.getAllDebitTransactions);
@@ -92,4 +108,5 @@ router.get('/user/profile/:userId', usersController.getUsersProfile)
 router.put('/user/profile/ubah-info-akun/:userId', cloudinaryConfig.uploadImageProfile.single("img_profile"), usersController.updateInfoAkun)
 router.put('/user/profile/ubah-password/:userId', usersController.updatePass)
 router.put('/user/profile/ubah-pin/:userId', usersController.updatePin)
+
 export default router;
