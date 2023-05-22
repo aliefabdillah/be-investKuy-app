@@ -54,6 +54,15 @@ const getLaporan = async(req, res, next) => {
     }
 }
 
+const getInvestor = async(req, res, next) => {
+    try {
+        res.json(await pengajuanService.getInvestor(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 const addLaporanKeuangan = async(req, res, next) => {
     try {
         res.json(await pengajuanService.addLaporanKeuangan(req))
@@ -80,5 +89,6 @@ export default {
     cancel,
     addLaporanKeuangan,
     getAll,
-    getLaporan
+    getLaporan,
+    getInvestor
 }

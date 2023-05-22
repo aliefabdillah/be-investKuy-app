@@ -26,14 +26,30 @@ async function createPengajuan(request){
 
     try {
 
+        //menghitung tanggal berakhir (crowdfunding  dilakukan selama 7 hari)
         const tgl_mulai = new Date()
         const tgl_berakhir = new Date(tgl_mulai.getTime() + (7 * 24 * 60 * 60 * 1000))
 
         const pemilik = await Users.findOne({ 
             where:{username: username},
         })
-        console.log(pemilik.id)
 
+        //check apakah akun sudah melakukan pengajuan atau belum
+        const existingPengajuan = await Pengajuan.findAll({
+            where: {
+                pemilikId: pemilik.id,
+                status: "In Progress"
+            }
+        })
+        if (existingPengajuan) {
+            responseError.message = "Anda sudah melakukan pengajuan mohon selesaikan terlebih dahulu"
+            return responseError
+        }
+        
+        //menghitung jumlah angsuran
+        const jml_angsuran = hitungJmlAngsuran(plafond, tenor, bagi_hasil)
+
+        //post data ke database
         const newPengajuan = await Pengajuan.create({
             pemilikId: pemilik.id,
             pekerjaan,
@@ -44,23 +60,26 @@ async function createPengajuan(request){
             tenor,
             bagi_hasil,
             jenis_angsuran,
+            jml_angsuran,
             akad,
             tgl_mulai: tgl_mulai,
             tgl_berakhir: tgl_berakhir
         })
 
+        //cek apakah input file ada
         if (!request.files) {
             responseError.message = "Mohon cantumkan Foto dan laporan keuangan dari UMKM!"
             return responseError
         }
 
-        console.log(request.files[0].path)
+        //ambil url dari cloudinary
         const image1_url = request.files[0].path
         const image2_url = request.files[1].path
         const image3_url = request.files[2].path
 
         const pengajuanId = newPengajuan.id
 
+        //masukan foto UMKM ke dalam tabel fotoUMKM
         const newFotoUmkm = await FotoUmkm.create({
             pengajuanId,
             image1_url: image1_url,
@@ -71,10 +90,11 @@ async function createPengajuan(request){
             image3_filename: request.files[2].filename,
         })
 
+        //ambil url laporan dan masukan k dalam tabel laporan
         const laporan_url = request.files[3].path
         const newLaporan = await LaporanKeuangan.create({
             laporan_url: laporan_url,
-            laporan_filename: request.files[3].path,
+            laporan_filename: request.files[3].filename,
             pengajuanId,
         })
 
@@ -117,6 +137,8 @@ async function updatePengajuanById(request){
             where: {username: username},
         })
         const existingPengajuan = await Pengajuan.findByPk(pengajuanId)
+
+        const jml_angsuran = hitungJmlAngsuran(plafond, tenor, bagi_hasil)
         const updatedPengajuan = await existingPengajuan.update({
             pekerjaan: pekerjaan,
             sektor: sektor,
@@ -126,6 +148,7 @@ async function updatePengajuanById(request){
             tenor: tenor,
             bagi_hasil: bagi_hasil,
             jenis_angsuran: jenis_angsuran,
+            jml_angsuran: jml_angsuran,
             akad: akad,
         })
 
@@ -170,11 +193,13 @@ async function getRiwayatPengajuan(request) {
     const { username } = request.params
 
     try {
+        //mengambil id pemilik pengajuan / akun
         const pemilik = await Users.findOne({ 
             where:{username: username},
             attributes: ['id']
         })
 
+        //cari pengajuan berdasarkan pemilik
         const pengajuanResult = await Pengajuan.findAll({
             where: {pemilikId: pemilik.id},
             attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 'status']
@@ -217,7 +242,7 @@ async function getPengajuanById(request) {
 
         listInvestor.forEach((investor) => {
             if (userId == investor.investorId) {
-                is_didanai = true
+                isFunded = true
             }
         })
 
@@ -284,6 +309,17 @@ async function cancelPengajuan(request){
     const { pengajuanId } = request.params
 
     try {
+        
+        //check apakah pengajuan memiliki pendanaan atau tidak
+        const existingPendanaan = await Pendanaan.findAll({ where: {pengajuanId: pengajuanId}})
+        
+        if (existingPendanaan) {
+            //jika ada 
+            responseError.message = "Pengajuan tidak dapat dibatalkan karena sudah memiliki Investor";
+            return responseError;
+        }
+
+        //jika tidak ada batalkan
         const existingPengajuan = await Pengajuan.findOne({ where: {id : pengajuanId}})
         await existingPengajuan.update({
             status: "Cancelled"
@@ -398,6 +434,54 @@ async function getLaporanKeuangan(request){
     }
 }
 
+async function getInvestor(request) {
+    var responseError = new ResponseClass.ErrorResponse();
+    var responseSuccess = new ResponseClass.SuccessResponse();
+
+    const {pengajuanId} = request.params
+
+    try {
+
+        const listInvestor = await Pendanaan.findAll({
+            where: {
+                pengajuanId: pengajuanId,
+                status: "In Progress" || "Completed"
+            },
+            include: [
+                {
+                    model: Users,
+                    as: "investorDetails",
+                    attributes: ['name']
+                }
+            ],
+            attributes: ['investorId', 'nominal']
+        })
+
+        responseSuccess.message = "Get list investor successfull!"
+        responseSuccess.data = listInvestor
+        return responseSuccess
+    } catch (error) {
+        console.log(error)
+        responseError.message = "Get list investor from database error!"
+        return responseError
+    }
+}
+
+function hitungJmlAngsuran(plafond, tenor, bagi_hasil) {
+    /* 
+        1. Rumus perhitungan jumlah angsuran per-tenor
+        = (plafond/tenor * %bagi hasil)
+
+        2.  rumus jml_angsuran
+        = (plafond/tenor) + jml_bagi hasil 
+    */
+    const jml_bagi_hasil = (plafond/tenor) * (bagi_hasil/100)
+
+    const jml_angsuran = (plafond/tenor) + jml_bagi_hasil
+
+    return jml_angsuran
+}
+
 export default {
     createPengajuan,
     updatePengajuanById,
@@ -407,5 +491,5 @@ export default {
     cancelPengajuan,
     getAllPengajuan,
     getLaporanKeuangan,
-
+    getInvestor,
 }
