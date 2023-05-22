@@ -8,6 +8,7 @@ import verificationController from "../controllers/verification.controller.js";
 import walletController from "../controllers/wallet.controller.js";
 import merchantController from "../controllers/merchant.controller.js";
 import rekeningController from "../controllers/rekening.controller.js";
+import pendanaanController from "../controllers/pendanaan.controller.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
 import verifyTokenMiddleware from "../middlewares/verifyToken.middleware.js";
 const router = express.Router();
@@ -52,14 +53,15 @@ router.put(
     cloudinaryConfig.uploadPengajuan.any([{name:'image1'},{name:'image2'},{name:'image3'}])
     ,pengajuanController.updateById
 );              //UMKM
-router.get('/riwayat-pengajuan/:username', pengajuanController.getRiwayat)      //UMKM
-router.get('/pengajuan/:pengajuanId', pengajuanController.getById)              //UMKM
+router.get('/riwayat-pengajuan/:username', pengajuanController.getRiwayat)              //UMKM
+router.get('/pengajuan/:pengajuanId', pengajuanController.getById)                      //UMKM
 router.post(
     '/pengajuan/:pengajuanId/tambah-laporan', 
     cloudinaryConfig.uploadPengajuan.single('laporan'), 
     pengajuanController.addLaporanKeuangan
-);                                                                              //UMKM
-router.put('/pengajuan/:pengajuanId/cancel', pengajuanController.cancel)        //UMKM
+);                                                                                      //UMKM
+router.put('/pengajuan/:pengajuanId/cancel', pengajuanController.cancel)                //UMKM
+router.get('/pengajuan/:pengajuanId/list-investor', pengajuanController.getInvestor)    //UMKM
 
 /* Pengajuan Investor */
 router.get('/pengajuan/:page', pengajuanController.getAll)                                    //Investor
@@ -96,5 +98,15 @@ router.get('/wallet/debits/:walletId', verifyTokenMiddleware.verifyTokenUser, wa
 router.get('/wallet/credits/:walletId', verifyTokenMiddleware.verifyTokenUser, walletController.getAllCreditTransactions);
 router.post('/wallet/debits', verifyTokenMiddleware.verifyTokenUser, walletController.createDebitTransaction);
 router.post('/wallet/credits', verifyTokenMiddleware.verifyTokenUser, walletController.createCreditTransaction);
+
+/* Pendanaan Investor */
+router.post('/pendanaan/:pengajuanId/:userId', pendanaanController.create)
+router.put('/pendanaan/cancel/:pengajuanId/:userId', pendanaanController.cancel)
+
+/* Profile Users */
+router.get('/user/profile/:userId', usersController.getUsersProfile)
+router.put('/user/profile/ubah-info-akun/:userId', cloudinaryConfig.uploadImageProfile.single("img_profile"), usersController.updateInfoAkun)
+router.put('/user/profile/ubah-password/:userId', usersController.updatePass)
+router.put('/user/profile/ubah-pin/:userId', usersController.updatePin)
 
 export default router;

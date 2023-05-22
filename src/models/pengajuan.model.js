@@ -40,6 +40,10 @@ export const Pengajuan = db.define("t_pengajuan", {
         type: DataTypes.STRING,
         allowNull: false
     },
+    jml_angsuran: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+    },
     akad: {
         type: DataTypes.STRING,
         allowNull: false
