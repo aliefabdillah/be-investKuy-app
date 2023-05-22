@@ -21,6 +21,9 @@ const WalletDebits = db.define('t_wallet_debits', {
   paymentCode: {
     type: DataTypes.STRING,
     unique: true
+  },
+  type: {
+    type: DataTypes.STRING
   }
 }, {
   freezeTableName: true,
