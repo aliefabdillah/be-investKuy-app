@@ -64,7 +64,11 @@ export const Pengajuan = db.define("t_pengajuan", {
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: "In Progress"
-    }
+    },
+    is_withdraw:{
+        type: DataTypes.BOOLEAN,
+        defaultValue: 0
+    },
 }, {
     freezeTableName: true,
     createdAt: 'createdAt',

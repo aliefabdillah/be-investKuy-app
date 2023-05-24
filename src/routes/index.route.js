@@ -53,8 +53,9 @@ router.put(
     cloudinaryConfig.uploadPengajuan.any([{name:'image1'},{name:'image2'},{name:'image3'}])
     ,pengajuanController.updateById
 );              //UMKM
-router.get('/riwayat-pengajuan/:username', pengajuanController.getRiwayat)              //UMKM
-router.get('/pengajuan/:pengajuanId', pengajuanController.getById)                      //UMKM
+router.get('/riwayat-crowdfunding/:username', pengajuanController.getRiwayatCrowdfunding)              //UMKM
+router.get('/riwayat-payment/:username', pengajuanController.getRiwayatPayment)              //UMKM
+router.get('/pengajuan-details/:pengajuanId', pengajuanController.getById)                      //UMKM
 router.post(
     '/pengajuan/:pengajuanId/tambah-laporan', 
     cloudinaryConfig.uploadPengajuan.single('laporan'), 
@@ -62,10 +63,11 @@ router.post(
 );                                                                                      //UMKM
 router.put('/pengajuan/:pengajuanId/cancel', pengajuanController.cancel)                //UMKM
 router.get('/pengajuan/:pengajuanId/list-investor', pengajuanController.getInvestor)    //UMKM
+router.put('/pengajuan/tarik-pendanaan/:pengajuanId/', pengajuanController.tarikPendanaan)   //UMKM
 
 /* Pengajuan Investor */
-router.get('/pengajuan/:page', pengajuanController.getAll)                                    //Investor
-router.get('/pengajuan/:pengajuanId/laporan-keuangan', pengajuanController.getLaporan)  //investor
+router.get('/pengajuan/:page', pengajuanController.getAll)                                      //Investor
+router.get('/pengajuan/:pengajuanId/laporan-keuangan', pengajuanController.getLaporan)          //investor
 
 /* Verification */
 router.post(

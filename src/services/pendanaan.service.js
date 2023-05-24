@@ -1,4 +1,3 @@
-import { where } from "sequelize";
 import { Pendanaan } from "../models/pendanaan.model.js";
 import { Pengajuan } from "../models/pengajuan.model.js";
 import ResponseClass from "../models/response.model.js"
@@ -28,6 +27,11 @@ async function createPendanaan(request) {
             return responseError
         }
 
+        if (pengajuanData.plafond == pengajuanData.jml_pendanaan) {
+            responseError.message = "Pendanaan sudah mencapai maximal!"
+            return responseError
+        }
+
         //cek apakah user sudah melakukan pendanaan pada pengajuan terkait atau belum
         const existingInvestor = await Pendanaan.findOne({
             where: {
@@ -43,12 +47,11 @@ async function createPendanaan(request) {
         }
 
         //hitung profit setiap pendanaan
-        const profit = hitungProfit(pengajuanData, nominal)
+        // const profit = hitungProfit(pengajuanData, nominal)
 
         //create pendanaan baru
         const newPendanaan = await Pendanaan.create({
             nominal: nominal,
-            profit: profit,
             pengajuanId: pengajuanId,
             investorId: userId,
         })
@@ -81,7 +84,6 @@ async function createPendanaan(request) {
             return responseError
         }
 
-        
         // proses CREDIT / uang keluar dari rekening investor
         const investorCredits = await walletCredits.create({ 
             amount: nominal,
@@ -189,25 +191,6 @@ async function cancelPendanaan(request) {
         responseError.message = "Pendanaan gagal disimpan ke database!"
         return responseError
     }
-}
-
-function hitungProfit(pengajuanData, nominal){
-
-    /* 
-        1. rumus perhitungan jmlh bagi hasil:
-        = jumlah angsuran per-tenor * Tenor
-        
-        2. Rumus perhitungan jumlah angsuran per-tenor
-        = (plafond/tenor * %bagi hasil)
-
-        3. Perhitungan keuntungan setiap investor
-        = (inves/plafond * 100%) * jumlah bagi hasil
-    */
-
-    const jml_bagi_hasil = pengajuanData.plafond/pengajuanData.tenor * pengajuanData.bagi_hasil/100
-    const profit = (nominal/pengajuanData.plafond * 100) * jml_bagi_hasil
-
-    return profit
 }
 
 export default {

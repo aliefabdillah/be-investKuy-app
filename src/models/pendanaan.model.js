@@ -20,6 +20,12 @@ export const Pendanaan = db.define("t_pendanaan", {
     profit:{
         type: DataTypes.INTEGER,
     },
+    weekly_profit: {
+        type: DataTypes.INTEGER
+    },
+    weekly_income: {
+        type: DataTypes.INTEGER
+    },
     tgl_selesai:{
         type: DataTypes.DATE
     },

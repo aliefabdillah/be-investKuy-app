@@ -5,6 +5,9 @@ import { FotoUmkm } from "../models/foto_umkm.model.js"
 import Users from "../models/users.model.js"
 import { Op } from "sequelize"
 import { Pendanaan } from "../models/pendanaan.model.js"
+import Wallets from "../models/wallet.model.js"
+import WalletDebits from "../models/walletDebit.model.js"
+import utilsService from "./utils.service.js"
 
 async function createPengajuan(request){
 
@@ -32,15 +35,18 @@ async function createPengajuan(request){
 
         const pemilik = await Users.findOne({ 
             where:{username: username},
+            attributes: ['id']
         })
 
         //check apakah akun sudah melakukan pengajuan atau belum
-        const existingPengajuan = await Pengajuan.findAll({
+        const existingPengajuan = await Pengajuan.findOne({
             where: {
                 pemilikId: pemilik.id,
-                status: "In Progress"
+                status: "In Progress" || "Payment Period"
             }
         })
+
+        console.log(existingPengajuan)
         if (existingPengajuan) {
             responseError.message = "Anda sudah melakukan pengajuan mohon selesaikan terlebih dahulu"
             return responseError
@@ -186,7 +192,7 @@ async function updatePengajuanById(request){
     }
 }
 
-async function getRiwayatPengajuan(request) {
+async function getRiwayatCrowdfunding(request) {
     var responseError = new ResponseClass.ErrorResponse();
     var responseSuccess = new ResponseClass.SuccessResponse();
 
@@ -201,12 +207,52 @@ async function getRiwayatPengajuan(request) {
 
         //cari pengajuan berdasarkan pemilik
         const pengajuanResult = await Pengajuan.findAll({
-            where: {pemilikId: pemilik.id},
+            where: {
+                pemilikId: pemilik.id,
+                status: "In Progress" || "Canceled"
+            },
             attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 'status']
         })
 
         responseSuccess.message = "Get Riwayat Pengajuan Successful!"
         responseSuccess.data = pengajuanResult
+        return responseSuccess
+    } catch (error) {
+        console.log(error);
+        responseError.message = "get riwayat Pengajuan from database error";
+        return responseError;
+    }
+}
+
+async function getRiwayatPayment(request) {
+    var responseError = new ResponseClass.ErrorResponse();
+    var responseSuccess = new ResponseClass.SuccessResponse();
+
+    const { username } = request.params
+
+    try {
+        //mengambil id pemilik pengajuan / akun
+        const pemilik = await Users.findOne({ 
+            where:{username: username},
+            attributes: ['id']
+        })
+
+        //cari pengajuan berdasarkan pemilik
+        const pengajuanResult = await Pengajuan.findAll({
+            where: {
+                pemilikId: pemilik.id,
+                status: "Payment Period" || "Finished"
+            },
+            attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_berakhir', 'angsuran', 'status']
+        })
+
+        const jatuh_tempo = new Date(pengajuanResult.tgl_berakhir.getTime() + (7 * 24 * 60 * 60 * 1000))
+
+        responseSuccess.message = "Get Riwayat Pengajuan Successful!"
+        responseSuccess.data = {
+            jatuh_tempo: jatuh_tempo,
+            pengajuanResult
+        }
         return responseSuccess
     } catch (error) {
         console.log(error);
@@ -355,6 +401,8 @@ async function getAllPengajuan(req) {
             [Op.like]: `%In Progress%`
         };
 
+        wherePengajuan.is_withdraw = false
+
         if (req.query.sektor) {
             wherePengajuan.sektor = {
               [Op.like]: `%${req.query.sektor}%`
@@ -467,6 +515,110 @@ async function getInvestor(request) {
     }
 }
 
+async function tarikUangPendanaan(request){
+    let responseError = new ResponseClass.ErrorResponse();
+    let responseSuccess = new ResponseClass.SuccessWithNoDataResponse();
+
+    const {pengajuanId} = request.params
+
+    try {
+        const pengajuanData = await Pengajuan.findOne({ 
+            where: {
+                id: pengajuanId,
+                status: "In Progress"
+            }, 
+            attributes:['id', 'plafond', 'tenor', 'bagi_hasil', 'jml_angsuran', 'status', 'jml_pendanaan', 'pemilikId']
+        })
+
+        const walletUmkm = await Wallets.findOne({
+            where: {userId: pengajuanData.pemilikId},
+            attributes: ['id', 'balance']
+        })   
+
+        if (!walletUmkm) {
+            responseError.message = "Wallet tidak ditemukan!"
+            return responseError
+        }
+
+        if (!pengajuanData) {
+            responseError.message = "Pengajuan tidak ditemukan!"
+            return responseError
+        }
+
+        //transfer uang ke saldo umkm
+        walletUmkm.balance += pengajuanData.jml_pendanaan
+        walletUmkm.save()
+
+        //input data penarikan hasil crowdfungding pada WalletDebit START
+        const umkmDebits = await WalletDebits.create({
+            amount: pengajuanData.jml_pendanaan,
+            walletId: walletUmkm.id,
+            type: "Penarikan Uang Crowdfunding"
+        })
+
+        const transactionCode = "CC" + walletUmkm.id + utilsService.generateId() + umkmDebits.id;
+        const paymentCode = walletUmkm.id + utilsService.generateCode() + umkmDebits.id;
+
+        umkmDebits.transactionCode = transactionCode
+        umkmDebits.paymentCode = paymentCode
+        umkmDebits.save()
+        //input data penarikan hasil crowdfungding pada WalletDebit END
+
+        // Hitung profit total dan weekly profit ketika crowdfunding selesai dilakukan START
+        const listInvestor = await Pendanaan.findAll({
+            where: {
+                pengajuanId: pengajuanId,
+                status: "In Progress"
+            },
+            attributes: ['id', 'nominal', 'profit', 'weekly_profit']
+        })
+
+        if (!listInvestor) {
+            responseError.message = "Pengajuan tidak memiliki investor!"
+            return responseError
+        }
+
+        listInvestor.forEach((investor) => {
+            const weeklyProfit = hitungWeeklyProfit(pengajuanData, investor.nominal)
+            const totalProfit = weeklyProfit * pengajuanData.tenor
+            investor.profit = totalProfit
+            investor.weekly_profit = weeklyProfit
+            investor.weekly_income = investor.nominal/pengajuanData.tenor
+            investor.save()
+        })
+        // Hitung profit total dan weekly profit ketika crowdfunding selesai dilakukan END
+
+        // Ganti status crowdfunding menjadi finished
+        pengajuanData.is_withdraw = true
+        pengajuanData.jml_angsuran = pengajuanData.jml_pendanaan/pengajuanData.tenor
+        pengajuanData.save()
+        
+        responseSuccess.message = "Uang Pendanaan berhasil disimpan ke saldo anda!"
+        return responseSuccess
+
+    } catch (error) {
+        console.log(error)
+        responseError.message = "Get list investor from database error!"
+        return responseError
+    }
+}
+
+function hitungWeeklyProfit(pengajuanData, nominal){
+
+    /* 
+        1. rumus perhitungan persenan bagi hasil setiap investor per minggu
+        = nominal pendanaan / jml_pendanaan yang terkumpul * 100%
+
+        2. Menghitung weekly bagi hasil 
+        = ((pendanaan terkumpul / tenor) * %bagi hasil) * (persenan bagi hasil perminggu)
+    */
+
+    const persen_weekly_bagi_hasil = (nominal/pengajuanData.jml_pendanaan) * 100
+    const weekly_bagi_hasil = ((pengajuanData.jml_pendanaan / pengajuanData.tenor) * (pengajuanData.bagi_hasil/100)) * (persen_weekly_bagi_hasil/100)
+
+    return weekly_bagi_hasil
+}
+
 function hitungJmlAngsuran(plafond, tenor, bagi_hasil) {
     /* 
         1. Rumus perhitungan jumlah angsuran per-tenor
@@ -485,11 +637,13 @@ function hitungJmlAngsuran(plafond, tenor, bagi_hasil) {
 export default {
     createPengajuan,
     updatePengajuanById,
-    getRiwayatPengajuan,
+    getRiwayatCrowdfunding,
     getPengajuanById,
     addLaporanKeuangan,
     cancelPengajuan,
     getAllPengajuan,
     getLaporanKeuangan,
     getInvestor,
+    tarikUangPendanaan,
+    getRiwayatPayment,
 }
