@@ -27,9 +27,18 @@ const getAll = async (req,res, next) => {
     }
 }
 
-const getRiwayat = async(req, res, next) => {
+const getRiwayatCrowdfunding = async(req, res, next) => {
     try {
-        res.json(await pengajuanService.getRiwayatPengajuan(req))
+        res.json(await pengajuanService.getRiwayatCrowdfunding(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+const getRiwayatPayment = async(req, res, next) => {
+    try {
+        res.json(await pengajuanService.getRiwayatPayment(req))
     } catch (error) {
         console.log(error)
         next(error)
@@ -81,14 +90,35 @@ const cancel = async(req, res, next) => {
     }
 }
 
+const tarikPendanaan = async(req, res, next) => {
+    try {
+        res.json(await pengajuanService.tarikUangPendanaan(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+const bayarCicilanPengajuan = async(req, res, next) => {
+    try {
+        res.json(await pengajuanService.bayarCicilan(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 export default {
     create,
     updateById,
-    getRiwayat,
+    getRiwayatCrowdfunding,
+    getRiwayatPayment,
     getById,
     cancel,
     addLaporanKeuangan,
     getAll,
     getLaporan,
-    getInvestor
+    getInvestor,
+    tarikPendanaan,
+    bayarCicilanPengajuan,
 }
