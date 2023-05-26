@@ -99,6 +99,15 @@ const tarikPendanaan = async(req, res, next) => {
     }
 }
 
+const bayarCicilanPengajuan = async(req, res, next) => {
+    try {
+        res.json(await pengajuanService.bayarCicilan(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 export default {
     create,
     updateById,
@@ -111,4 +120,5 @@ export default {
     getLaporan,
     getInvestor,
     tarikPendanaan,
+    bayarCicilanPengajuan,
 }

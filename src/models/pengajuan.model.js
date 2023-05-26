@@ -56,6 +56,9 @@ export const Pengajuan = db.define("t_pengajuan", {
         type: DataTypes.DATE,
         allowNull: false
     },
+    tgl_mulai_bayar:{
+        type: DataTypes.DATE,
+    },
     jml_pendanaan:{
         type: DataTypes.INTEGER,
         defaultValue: 0
@@ -69,6 +72,10 @@ export const Pengajuan = db.define("t_pengajuan", {
         type: DataTypes.BOOLEAN,
         defaultValue: 0
     },
+    angsuran_dibayar:{
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    }
 }, {
     freezeTableName: true,
     createdAt: 'createdAt',

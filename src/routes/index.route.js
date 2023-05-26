@@ -63,7 +63,8 @@ router.post(
 );                                                                                      //UMKM
 router.put('/pengajuan/:pengajuanId/cancel', pengajuanController.cancel)                //UMKM
 router.get('/pengajuan/:pengajuanId/list-investor', pengajuanController.getInvestor)    //UMKM
-router.put('/pengajuan/tarik-pendanaan/:pengajuanId/', pengajuanController.tarikPendanaan)   //UMKM
+router.put('/pengajuan/:pengajuanId/tarik-pendanaan', pengajuanController.tarikPendanaan)   //UMKM
+router.put('/pengajuan/:pengajuanId/bayar-cicilan', pengajuanController.bayarCicilanPengajuan) //UMKM
 
 /* Pengajuan Investor */
 router.get('/pengajuan/:page', pengajuanController.getAll)                                      //Investor

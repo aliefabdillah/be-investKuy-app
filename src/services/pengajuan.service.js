@@ -8,6 +8,7 @@ import { Pendanaan } from "../models/pendanaan.model.js"
 import Wallets from "../models/wallet.model.js"
 import WalletDebits from "../models/walletDebit.model.js"
 import utilsService from "./utils.service.js"
+import walletCredits from "../models/walletCredit.model.js"
 
 async function createPengajuan(request){
 
@@ -32,6 +33,7 @@ async function createPengajuan(request){
         //menghitung tanggal berakhir (crowdfunding  dilakukan selama 7 hari)
         const tgl_mulai = new Date()
         const tgl_berakhir = new Date(tgl_mulai.getTime() + (7 * 24 * 60 * 60 * 1000))
+        const tgl_mulai_bayar = new Date(tgl_berakhir.getTime() + (30 * 24 * 60 * 60 * 1000))
 
         const pemilik = await Users.findOne({ 
             where:{username: username},
@@ -69,7 +71,8 @@ async function createPengajuan(request){
             jml_angsuran,
             akad,
             tgl_mulai: tgl_mulai,
-            tgl_berakhir: tgl_berakhir
+            tgl_berakhir: tgl_berakhir,
+            tgl_mulai_bayar: tgl_mulai_bayar,
         })
 
         //cek apakah input file ada
@@ -241,12 +244,12 @@ async function getRiwayatPayment(request) {
         const pengajuanResult = await Pengajuan.findAll({
             where: {
                 pemilikId: pemilik.id,
-                status: "Payment Period" || "Finished"
+                status: "Payment Period" || "Lunas" || "Lunas Dini" || "Tepat Waktu"
             },
             attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_berakhir', 'angsuran', 'status']
         })
 
-        const jatuh_tempo = new Date(pengajuanResult.tgl_berakhir.getTime() + (7 * 24 * 60 * 60 * 1000))
+        const jatuh_tempo = new Date(tgl_mulai_bayar.getTime() + (pengajuanResult.tenor * 7 * 24 * 60 * 60 * 1000))
 
         responseSuccess.message = "Get Riwayat Pengajuan Successful!"
         responseSuccess.data = {
@@ -570,7 +573,7 @@ async function tarikUangPendanaan(request){
                 pengajuanId: pengajuanId,
                 status: "In Progress"
             },
-            attributes: ['id', 'nominal', 'profit', 'weekly_profit']
+            attributes: ['id', 'nominal', 'profit', 'weekly_profit', 'weekly_income']
         })
 
         if (!listInvestor) {
@@ -590,10 +593,103 @@ async function tarikUangPendanaan(request){
 
         // Ganti status crowdfunding menjadi finished
         pengajuanData.is_withdraw = true
-        pengajuanData.jml_angsuran = pengajuanData.jml_pendanaan/pengajuanData.tenor
+        pengajuanData.jml_angsuran = hitungJmlAngsuran(pengajuanData.jml_pendanaan, pengajuanData.tenor, pengajuanData.bagi_hasil)
         pengajuanData.save()
         
         responseSuccess.message = "Uang Pendanaan berhasil disimpan ke saldo anda!"
+        return responseSuccess
+
+    } catch (error) {
+        console.log(error)
+        responseError.message = "Get list investor from database error!"
+        return responseError
+    }
+}
+
+async function bayarCicilan(request){
+    let responseError = new ResponseClass.ErrorResponse();
+    let responseSuccess = new ResponseClass.SuccessWithNoDataResponse();
+
+    const {pengajuanId} = request.params
+
+    try {
+        const pengajuanData = await Pengajuan.findOne({
+            where: {
+                id: pengajuanId,
+                status: "Payment Period",
+            },
+            attributes: ['id', 'tenor', 'jml_angsuran', 'status', 'pemilikId', 'angsuran_dibayar', 'tgl_mulai_bayar']
+        })
+
+        //pengurangan saldo umkm
+        const walletUmkm = await Wallets.findOne({
+            where: {userId: pengajuanData.pemilikId},
+            attributes: ['id','balance']
+        })
+
+        if (walletUmkm.balance < pengajuanData.jml_angsuran) {
+            responseError.message = "Saldo anda tidak mencukupi!"
+            return responseError
+        }
+
+        // ambil data list investor
+        const listInvestor = await Pendanaan.findAll({
+            where: {
+                pengajuanId: pengajuanId,
+                status: "In Progress"
+            },
+        })
+
+        if (!listInvestor) {
+            responseError.message = "Pengajuan tidak memiliki investor!"
+            return responseError
+        }
+
+        walletUmkm.balance -= pengajuanData.jml_angsuran
+        walletUmkm.save()
+
+        // pencatatan CREDIT / uang keluar dari saldo umkm
+        const umkmCredits = await walletCredits.create({ 
+            amount: pengajuanData.jml_angsuran,
+            type: "Bayar Cicilan",
+            walletId: walletUmkm.id
+        })
+
+        const transactionCode = "CC" + utilsService.generateId() + walletUmkm.id + umkmCredits.id;
+        umkmCredits.transactionCode = transactionCode
+        umkmCredits.save()
+
+        //jumlah angsuran dibayar bertambah
+        pengajuanData.angsuran_dibayar += pengajuanData.jml_angsuran
+        const totalKewajibanBayar = pengajuanData.tenor * pengajuanData.jml_angsuran
+        const jatuhTempo = new Date(pengajuanData.tgl_mulai_bayar.getTime() + (pengajuanData.tenor * 7 * 24 * 60 * 60 * 1000))
+
+        if (pengajuanData.angsuran_dibayar == totalKewajibanBayar) {
+            pengajuanData.status = "Lunas"
+        }
+        pengajuanData.save()
+
+        
+        //memasukan jumlah repayment dan status pembayaran ke data penadanaan
+        listInvestor.forEach((investorData) => {
+            investorData.repayment += investorData.weekly_income + investorData.weekly_profit
+            const expectedTotalIncome = investorData.nominal + investorData.profit
+
+            if (investorData.repayment == expectedTotalIncome) {
+                investorData.tgl_selesai = new Date()
+
+                if (investorData.tgl_selesai < jatuhTempo) {
+                    investorData.status = "Lunas Dini"
+                }else if(investorData.tgl_selesai = jatuhTempo){
+                    investorData.status = "Tepat Waktu"
+                }else{
+                    investorData.status = "Lunas"
+                }
+            }
+            investorData.save()
+        })
+
+        responseSuccess.message = "Pembayaran Cicilan berhasil!"
         return responseSuccess
 
     } catch (error) {
@@ -646,4 +742,5 @@ export default {
     getInvestor,
     tarikUangPendanaan,
     getRiwayatPayment,
+    bayarCicilan,
 }

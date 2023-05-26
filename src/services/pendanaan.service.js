@@ -32,31 +32,7 @@ async function createPendanaan(request) {
             return responseError
         }
 
-        //cek apakah user sudah melakukan pendanaan pada pengajuan terkait atau belum
-        const existingInvestor = await Pendanaan.findOne({
-            where: {
-                investorId: userId,
-                pengajuanId: pengajuanId,
-                status: "In Progress"
-            }
-        })
-
-        if (existingInvestor) {
-            responseError.message = "Anda sudah melakukan pendanaan pada pengajuan ini silahkan selesaikan terlebih dahulu!"
-            return responseError
-        }
-
-        //hitung profit setiap pendanaan
-        // const profit = hitungProfit(pengajuanData, nominal)
-
-        //create pendanaan baru
-        const newPendanaan = await Pendanaan.create({
-            nominal: nominal,
-            pengajuanId: pengajuanId,
-            investorId: userId,
-        })
-
-        // PENGURANGAN SALDO DI INVESTOR DAN PENAMBAHAN JML_PENDANAAN DI PENGAJUAN
+        //cek jumlah saldo
         const currentWallet = await Wallets.findOne({
             where: {userId: userId}, 
             include: [
@@ -84,6 +60,30 @@ async function createPendanaan(request) {
             return responseError
         }
 
+        //cek apakah user sudah melakukan pendanaan pada pengajuan terkait atau belum
+        const existingInvestor = await Pendanaan.findOne({
+            where: {
+                investorId: userId,
+                pengajuanId: pengajuanId,
+                status: "In Progress"
+            }
+        })
+
+        if (existingInvestor) {
+            responseError.message = "Anda sudah melakukan pendanaan pada pengajuan ini silahkan selesaikan terlebih dahulu!"
+            return responseError
+        }
+
+        //hitung profit setiap pendanaan
+        // const profit = hitungProfit(pengajuanData, nominal)
+
+        //create pendanaan baru
+        const newPendanaan = await Pendanaan.create({
+            nominal: nominal,
+            pengajuanId: pengajuanId,
+            investorId: userId,
+        })
+
         // proses CREDIT / uang keluar dari rekening investor
         const investorCredits = await walletCredits.create({ 
             amount: nominal,
@@ -95,6 +95,7 @@ async function createPendanaan(request) {
         investorCredits.transactionCode = transactionCode
         investorCredits.save()
 
+        /* PENGURANGAN SALDO DI INVESTOR DAN PENAMBAHAN JML_PENDANAAN DI PENGAJUAN */
         //saldo berkurang
         currentWallet.balance -= investorCredits.amount
         currentWallet.save()
@@ -144,6 +145,15 @@ async function cancelPendanaan(request) {
             return responseError
         }
 
+        //ambil data pengajuan dan wallet
+        const pengajuanData = await Pengajuan.findOne({ where: {id: pengajuanId}, attributes:['id', 'jml_pendanaan']})
+        const currentWallet = await Wallets.findOne({where: {userId: userId}, attributes:['id','balance']})
+
+        if (!currentWallet) {
+            responseError.message = "Wallet Not Found"
+            return responseError
+        }
+
         //cek apakah tanggal pembatalan sudah melebih tanggal terakhir crowdfunding atau tidak
         const currentDate = new Date()
         if (currentDate > existingPendanaan.pengajuanDetails.tgl_berakhir) {
@@ -156,14 +166,6 @@ async function cancelPendanaan(request) {
         existingPendanaan.save()
 
         // PENGEMBALIAN SALDO KE INVESTOR DAN PENGURANGAN JUMLAH PENDANAAN DI PENGAJUAN
-        const pengajuanData = await Pengajuan.findOne({ where: {id: pengajuanId}, attributes:['id', 'jml_pendanaan']})
-        const currentWallet = await Wallets.findOne({where: {userId: userId}, attributes:['id','balance']})
-
-        if (!currentWallet) {
-            responseError.message = "Wallet Not Found"
-            return responseError
-        }
-
         currentWallet.balance += existingPendanaan.nominal
         currentWallet.save()
         pengajuanData.jml_pendanaan -= existingPendanaan.nominal
