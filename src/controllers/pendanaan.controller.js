@@ -27,8 +27,28 @@ const tarikIncome = async(req, res, next) => {
     }
 }
 
+const getInProgressPendanaan = async(req, res, next) => {
+    try {
+        res.json(await pendanaanService.getInProgressPendanaan(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+const getCompletedPendanaan = async(req, res, next) => {
+    try {
+        res.json(await pendanaanService.getCompletedPendanaan(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 export default {
     create,
     cancel,
-    tarikIncome
+    tarikIncome,
+    getInProgressPendanaan,
+    getCompletedPendanaan
 }

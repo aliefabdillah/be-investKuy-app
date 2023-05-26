@@ -106,6 +106,8 @@ router.post('/wallet/credits', verifyTokenMiddleware.verifyTokenUser, walletCont
 router.post('/pendanaan/:pengajuanId/:userId', pendanaanController.create)
 router.put('/pendanaan/cancel/:pengajuanId/:userId', pendanaanController.cancel)
 router.put('/pendanaan/:pendanaanId/tarik-pendanaan', pendanaanController.tarikIncome)
+router.get('/pendanaan/riwayat-in-progress/:userId', pendanaanController.getInProgressPendanaan)
+router.get('/pendanaan/riwayat-completed/:userId', pendanaanController.getCompletedPendanaan)
 
 /* Profile Users */
 router.get('/user/profile/:userId', usersController.getUsersProfile)
