@@ -18,7 +18,17 @@ const cancel = async (req, res, next) => {
     }
 }
 
+const tarikIncome = async(req, res, next) => {
+    try {
+        res.json(await pendanaanService.tarikIncomePendanaan(req))
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 export default {
     create,
-    cancel
+    cancel,
+    tarikIncome
 }

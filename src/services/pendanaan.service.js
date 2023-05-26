@@ -195,7 +195,68 @@ async function cancelPendanaan(request) {
     }
 }
 
+async function tarikIncomePendanaan(request) {
+    let responseSuccess = new ResponseClass.SuccessWithNoDataResponse()
+    let responseError = new ResponseClass.ErrorResponse()
+
+    const {pendanaanId} = request.params
+
+    try {
+        const pendanaanData = await Pendanaan.findOne({
+            where: {
+                id: pendanaanId,
+            },
+            attributes: ['id', 'tgl_selesai', 'repayment', 'investorId']
+        })
+
+        if (!pendanaanData) {
+            responseError.message = "Pendanaan tidak ditemukan"
+            return responseError
+        }
+
+        if (!pendanaanData.tgl_selesai) {
+            responseError.message = "Anda dapat menarik income ketika pendaan telah selesai"
+            return responseError
+        }
+
+        const currentWalletInvestor = await Wallets.findOne({
+            where: {userId: pendanaanData.investorId},
+            attributes: ['id', 'balance']
+        })
+
+        if (!currentWalletInvestor) {
+            responseError.message = "wallet tidak ditemukan"
+            return responseError
+        }
+
+        currentWalletInvestor.balance += pendanaanData.repayment
+        currentWalletInvestor.save()
+
+        const walletInvestorDebit = await WalletDebits.create({
+            amount: pendanaanData.repayment,
+            type: "Penarikan Income Pendanaan",
+            walletId: currentWalletInvestor.id
+        })
+        
+        const transactionCode = "CC" + currentWalletInvestor.id + utilsService.generateId() + walletInvestorDebit.id;
+        const paymentCode = currentWalletInvestor.id + utilsService.generateCode() + walletInvestorDebit.id;
+
+        walletInvestorDebit.transactionCode = transactionCode
+        walletInvestorDebit.paymentCode = paymentCode
+        walletInvestorDebit.save()
+
+        responseSuccess.message = "Penarikan dana ke saldo berhasil!"
+        return responseSuccess
+
+    } catch (error) {
+        console.log(error.message)
+        responseError.message = "Gagal melakukan tarik dana ke database!"
+        return responseError
+    }
+}
+
 export default {
     createPendanaan,
     cancelPendanaan,
+    tarikIncomePendanaan,
 }

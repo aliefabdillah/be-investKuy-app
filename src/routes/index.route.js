@@ -105,6 +105,7 @@ router.post('/wallet/credits', verifyTokenMiddleware.verifyTokenUser, walletCont
 /* Pendanaan Investor */
 router.post('/pendanaan/:pengajuanId/:userId', pendanaanController.create)
 router.put('/pendanaan/cancel/:pengajuanId/:userId', pendanaanController.cancel)
+router.put('/pendanaan/:pendanaanId/tarik-pendanaan', pendanaanController.tarikIncome)
 
 /* Profile Users */
 router.get('/user/profile/:userId', usersController.getUsersProfile)
