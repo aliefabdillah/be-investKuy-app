@@ -6,6 +6,7 @@ import walletCredits from "../models/walletCredit.model.js";
 import utilsService from "./utils.service.js";
 import Users from "../models/users.model.js";
 import WalletDebits from "../models/walletDebit.model.js";
+import { request } from "express";
 
 async function createPendanaan(request) {
     let responseSuccess = new ResponseClass.SuccessResponse()
@@ -255,8 +256,99 @@ async function tarikIncomePendanaan(request) {
     }
 }
 
+async function getInProgressPendanaan(request) {
+    let responseSuccess = new ResponseClass.SuccessResponse()
+    let responseError = new ResponseClass.ErrorResponse()
+
+    const {userId} = request.params
+
+    try {
+        const pendanaanData = await Pendanaan.findAll({
+            where: {
+                investorId: userId,
+                status: "In Progress"
+            },
+            include: [
+                {
+                    model: Pengajuan,
+                    as: "pengajuanDetails",
+                    include: [
+                        {
+                            model: Users,
+                            as: "pemilikDetails",
+                            attributes: ['id', 'name', 'alamat']
+                        }
+                    ],
+                    attributes: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor']
+                }
+            ],
+            attributes: ['id', 'nominal', 'repayment']
+        })
+
+        if (!pendanaanData) {
+            responseError.message = "Pendanaan Tidak Ada!"
+            return responseError
+        }
+
+        responseSuccess.message = "Get Riwayat Pendanaan In Progress successfull!"
+        responseSuccess.data = pendanaanData
+        return responseSuccess
+    } catch (error) {
+        console.log(error.message)
+        responseError.message = "Gagal mengambil data pendanaan dari database!"
+        return responseError
+    }
+}
+
+async function getCompletedPendanaan(request) {
+    let responseSuccess = new ResponseClass.SuccessResponse()
+    let responseError = new ResponseClass.ErrorResponse()
+
+    const {userId} = request.params
+
+    try {
+        const pendanaanData = await Pendanaan.findAll({
+            where: {
+                investorId: userId,
+                status: "Lunas Dini" || "Tepat Waktu" || "Lunas"
+            },
+            include: [
+                {
+                    model: Pengajuan,
+                    as: "pengajuanDetails",
+                    include: [
+                        {
+                            model: Users,
+                            as: "pemilikDetails",
+                            attributes: ['id', 'name', 'alamat']
+                        }
+                    ],
+                    attributes: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor']
+                }
+            ],
+            attributes: ['id', 'nominal', 'profit', 'status', 'tgl_selesai']
+        })
+
+        if (!pendanaanData) {
+            responseError.message = "Pendanaan Tidak Ada!"
+            return responseError
+        }
+
+        responseSuccess.message = "Get Riwayat Pendanaan Completed successfull!"
+        responseSuccess.data = pendanaanData
+        return responseSuccess
+    } catch (error) {
+        console.log(error.message)
+        responseError.message = "Gagal mengambil data pendanaan dari database!"
+        return responseError
+    }
+}
+
+
 export default {
     createPendanaan,
     cancelPendanaan,
     tarikIncomePendanaan,
+    getInProgressPendanaan,
+    getCompletedPendanaan,
 }
