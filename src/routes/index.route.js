@@ -67,7 +67,7 @@ router.put('/pengajuan/:pengajuanId/tarik-pendanaan', pengajuanController.tarikP
 router.put('/pengajuan/:pengajuanId/bayar-cicilan', pengajuanController.bayarCicilanPengajuan) //UMKM
 
 /* Pengajuan Investor */
-router.get('/pengajuan/:page', pengajuanController.getAll)                                      //Investor
+router.get('/pengajuan/list', pengajuanController.getAll)                                      //Investor
 router.get('/pengajuan/:pengajuanId/laporan-keuangan', pengajuanController.getLaporan)          //investor
 
 /* Verification */

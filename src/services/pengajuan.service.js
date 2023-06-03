@@ -389,7 +389,7 @@ async function getAllPengajuan(req) {
 
     try {   
         //pagination
-        const pageNumber = req.params.page ? parseInt(req.params.page, 10) : 1
+        const pageNumber = req.query.page ? parseInt(req.query.page, 10) : 1
         const itemsPerPage = req.query.pageSize ? parseInt(req.query.pageSize, 10) : 10
 
         const offset = (pageNumber - 1) * itemsPerPage;
@@ -424,7 +424,7 @@ async function getAllPengajuan(req) {
             };
         }
 
-        if (req,query.lokasi) {
+        if (req.query.lokasi) {
             wherePengajuan.alamat = {
                 [Op.like]: `%${req.query.lokasi}%`
             }
