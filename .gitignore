@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+#aws EC2 instance .pem 
+investkuy-api-webserver.pem

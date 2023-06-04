@@ -1,16 +1,67 @@
 import express from "express";
-import router from "./src/routes/index.route";
+import router from "./src/routes/index.route.js";
+import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import db from "./src/configs/db.config.js";
+import cookieParser from "cookie-parser";
+import cors from 'cors';
 dotenv.config()
+
+// import { Admin } from "./src/models/admin.model.js";
+// import { Artikel } from "./src/models/artikel.model.js";
+// import { Faq } from "./src/models/faq.model.js";
+// import Users from "./src/models/users.model.js";
+// import { Pengajuan } from "./src/models/pengajuan.model.js";
+// import { FotoUmkm } from "./src/models/foto_umkm.model.js";
+// import { LaporanKeuangan } from "./src/models/laporan_keuangan.model.js";
+// import {Verification} from "./src/models/verification.model.js";
+// import { Pendanaan } from "./src/models/pendanaan.model.js";
+// import Merchants from "./src/models/merchant.model.js";
+// import Wallets from "./src/models/wallet.model.js";
+// import WalletDebits from "./src/models/walletDebit.model.js";
+// import walletCredits from "./src/models/walletCredit.model.js";
+// import Rekening from "./src/models/rekening.model.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(router);
+app.use(bodyParser.json());
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
+
+app.use(cors({
+    origin: '*',
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))
+
+try {
+    await db.authenticate();
+    // await Test.sync();
+    // await Admin.sync()
+    // await Artikel.sync();
+    // await Faq.sync()
+    // await Users.sync()
+    // await Pengajuan.sync()
+    // await FotoUmkm.sync()
+    // await LaporanKeuangan.sync()
+    // await Verification.sync()
+    // await Pendanaan.sync()
+    // await Merchants.sync()
+    // await Wallets.sync()
+    // await walletCredits.sync()
+    // await WalletDebits.sync()
+    // await Rekening.sync()
+} catch (error) {
+    console.log(error)
+}
+
+
+app.use(router)
+app.use(cookieParser());
 app.use(express.json);
-app.get('/', (req, res) => {
-    res.json({'Message': 'ok'})
-})
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {
