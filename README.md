@@ -1,7 +1,7 @@
 # Use In Local
 1. Clone repository following this command
 ```
-https://github.com/aliefabdillah/be-investKuy-app.git
+git clone https://github.com/aliefabdillah/be-investKuy-app.git
 ```
 2. Install dependencies
 ```
