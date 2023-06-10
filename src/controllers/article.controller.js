@@ -22,7 +22,7 @@ const getById = async (req, res) => {
 const create = async (req, res) => {
     try {
         const response = await artikelService.createArticle(req)
-        res.json()
+        res.status(response.code).send(response)
     } catch (error) {
         console.error(error)
     }
