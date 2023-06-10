@@ -16,4 +16,4 @@ npm run start-dev
 
 # USE AWS
 - Link : http://18.140.79.85/
-- Postman Documentation : https://documenter.getpostman.com/view/8765062/2s93sXcZop
+- Postman Documentation : https://documenter.getpostman.com/view/8765062/2s93sc4YG8
