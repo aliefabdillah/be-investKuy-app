@@ -41,7 +41,7 @@ async function getDetailsArticle(request) {
         });
 
         if (!articleDetailsResult) {
-            responseError.message = "Article details empty!";
+            responseError.message = `Article details with id: ${articleId} not found!`;
             return responseError;
         }
 

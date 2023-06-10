@@ -2,7 +2,8 @@ import FaqService from '../services/faq.service.js';
 
 const get = async (req, res) => {
     try {
-        res.json(await FaqService.getFaq())
+        const response = await FaqService.getFaq()
+        res.status(response.code).send(response)
     } catch (error) {
         console.log(error)
     }
@@ -10,7 +11,8 @@ const get = async (req, res) => {
 
 const create = async(req, res, next) => {
     try {
-        res.json(await FaqService.createFaq(req));
+        const response = await FaqService.createFaq(req)
+        res.status(response.code).send(response)
     } catch (error) {
         console.log(error)
         next(error);
@@ -19,7 +21,8 @@ const create = async(req, res, next) => {
 
 const update = async(req, res, next) => {
     try {
-        res.json(await FaqService.updateFaqById(req))
+        const response = await FaqService.updateFaqById(req)
+        res.status(response.code).send(response)
     } catch (error) {
         console.log(error)
         next(error)
@@ -28,7 +31,8 @@ const update = async(req, res, next) => {
 
 const deleteById = async(req, res, next) => {
     try {
-        res.json(await FaqService.deleteFaqById(req))
+        const response = await FaqService.deleteFaqById(req)
+        res.status(response.code).send(response)
     } catch (error) {
         console.log(error)
         next(error)

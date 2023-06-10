@@ -2,7 +2,8 @@ import verificationService from "../services/verification.service.js";
 
 const create = async (req, res, next) => {
     try {
-        res.json(await verificationService.createVerification(req))
+        const response = await verificationService.createVerification(req)
+        res.status(response.code).send(response)
     } catch (error) {
         console.log(error)
         next(error)
@@ -11,7 +12,8 @@ const create = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
     try {
-        res.json(await verificationService.getAllVerification())
+        const response = await verificationService.getAllVerification()
+        res.status(response.code).send(response)
     } catch (error) {
         console.log(error)
         next(error)
@@ -20,7 +22,8 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
     try {
-        res.json(await verificationService.getDetailsVerificationById(req))
+        const response = await verificationService.getDetailsVerificationById(req)
+        res.status(response.code).send(response)
     } catch (error) {
         console.log(error)
         next(error)
@@ -29,7 +32,8 @@ const getById = async (req, res, next) => {
 
 const updateVerified = async (req, res, next) => {
     try {
-        res.json(await verificationService.updateUserVerified(req))
+        const response = await verificationService.updateUserVerified(req)
+        res.status(response.code).send(response)
     } catch (error) {
         console.log(error)
         next(error)

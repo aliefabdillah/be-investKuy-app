@@ -290,6 +290,12 @@ async function getInProgressPendanaan(request) {
             return responseError
         }
 
+        if (pendanaanData.length == 0) {
+            responseSuccess.message = "Tidak Ada Pendanaan Berlangsung!"
+            responseSuccess.data = pendanaanData
+            return responseSuccess
+        }
+
         responseSuccess.message = "Get Riwayat Pendanaan In Progress successfull!"
         responseSuccess.data = pendanaanData
         return responseSuccess
@@ -332,6 +338,12 @@ async function getCompletedPendanaan(request) {
         if (!pendanaanData) {
             responseError.message = "Pendanaan Tidak Ada!"
             return responseError
+        }
+
+        if (pendanaanData.length == 0) {
+            responseSuccess.message = "Pendanaan Selesai Tidak Ada!"
+            responseSuccess.data = pendanaanData
+            return responseSuccess
         }
 
         responseSuccess.message = "Get Riwayat Pendanaan Completed successfull!"

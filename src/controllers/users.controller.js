@@ -7,7 +7,7 @@ import profileService from '../services/profile.service.js';
 const register = async (req, res) => {
   try {
     const response = await AuthService.registerUser(req.body);
-    res.json(response);
+    res.status(response.code).send(response);
   } catch (error) {
     let responseError = new ResponseClass.ErrorResponse();
     responseError.code = 500;
@@ -19,7 +19,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const response = await AuthService.loginUser(req.body);
-    res.json(response);
+    res.status(response.code).send(response);
   } catch (error) {
     let responseError = new ResponseClass.ErrorResponse();
     responseError.code = 500;
@@ -57,23 +57,24 @@ const getAllUsers = async (req, res) => {
         [sortColumn, sortOrder]
       ],
       attributes: [
-        'id', 'name', 'username', 'email', 'no_telepon', 'alamat', 'role', 'isVerified',
+        'id', 'name', 'username', 'email', 'no_telepon', 'alamat', 'role', 'is_verified',
       ]
     });
 
     responseSuccess.message = "Successfully getting all users data.";
     responseSuccess.data = users;
-    res.json(responseSuccess);
+    res.status(responseSuccess.code).send(responseSuccess);
   } catch (error) {
     responseError.code = 500;
     responseError.message = error;
-    res.json(responseError);
+    res.status(responseError.code).send(responseError);
   }
 };
 
 const getUsersProfile = async (req, res, next) => {
   try {
-    res.json(await profileService.getProfile(req))
+    const response = await profileService.getProfile(req)
+    res.status(response.code).send(response)
   } catch (error) {
     console.log(error)
     next(error)
@@ -82,7 +83,8 @@ const getUsersProfile = async (req, res, next) => {
 
 const updateInfoAkun = async (req, res, next) => {
   try {
-    res.json(await profileService.updateInfoAkun(req))
+    const response = await profileService.updateInfoAkun(req)
+    res.status(response.code).send(response)
   } catch (error) {
     console.log(error)
     next(error)
@@ -91,7 +93,8 @@ const updateInfoAkun = async (req, res, next) => {
 
 const updatePass = async (req, res, next) => {
   try {
-    res.json(await profileService.updatePassword(req))
+    const response = await profileService.updatePassword(req)
+    res.status(response.code).send(response)
   } catch (error) {
     console.log(error)
     next(error)
@@ -100,7 +103,8 @@ const updatePass = async (req, res, next) => {
 
 const updatePin = async (req, res, next) => {
   try {
-    res.json(await profileService.updatePin(req))
+    const response = await profileService.updatePin(req)
+    res.status(response.code).send(response)
   } catch (error) {
     console.log(error)
     next(error)
