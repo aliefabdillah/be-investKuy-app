@@ -148,8 +148,9 @@ const loginUser = async (requestBody) => {
 
   responseSuccess.message = "Login success.";
   responseSuccess.data = {
+    id: registeredUser.id,
     name: registeredUser.name,
-    username: registeredUser.name,
+    username: registeredUser.username,
     email: registeredUser.email,
     no_telepon: registeredUser.no_telepon,
     alamat: registeredUser.alamat,
