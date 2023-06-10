@@ -8,7 +8,7 @@ import MerchantService from "../services/merchant.service.js";
 const get = async (req, res) => {
   try {
     const data = await MerchantService.getAllMerchants();
-    res.json(data);
+    res.status(data.code).send(data);
   } catch (error) {
     console.log(error);
   }
@@ -22,7 +22,7 @@ const get = async (req, res) => {
 const getById = async (req, res) => {
   try {
     const data = await MerchantService.getMerchantById(req.params.id);
-    res.json(data);
+    res.status(data.code).send(data);
   } catch (error) {
     console.log(error);
   }
@@ -36,7 +36,7 @@ const getById = async (req, res) => {
 const create = async (req, res) => {
   try {
     const data = await MerchantService.createMerchant(req.body);
-    res.json(data);
+    res.status(data.code).send(data);
   } catch (error) {
     console.log(error);
   }
@@ -50,7 +50,7 @@ const create = async (req, res) => {
 const update = async (req, res) => {
   try {
     const data = await MerchantService.updateMerchant(req);
-    res.json(data);
+    res.status(data.code).send(data);
   } catch (error) {
     console.log(error);
   }
@@ -64,7 +64,7 @@ const update = async (req, res) => {
 const deleteById = async (req, res) => {
   try {
     const data = await MerchantService.deleteMerchant(req.params.id);
-    res.json(data);
+    res.status(data.code).send(data);
   } catch (error) {
     console.log(error);
   }

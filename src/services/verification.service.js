@@ -103,6 +103,11 @@ async function getAllVerification(){
             attributes: ['id','nama','nik']
         })
 
+        if (verificationData.length == 0) {
+            responseSuccess.message = "Data Verifikasi tidak ada!"
+            return responseSuccess
+        }
+
         responseSuccess.message = "Get All verification successfull!"
         responseSuccess.data = verificationData
         return responseSuccess
@@ -132,6 +137,11 @@ async function getDetailsVerificationById(request){
             ],
             attributes: ['id','nama','nik','tgl_lahir','gender','alamat','ktpImg_url','pasFoto_url']
         })
+
+        if(!verificationDetailsData){
+            responseError.message = `Data dengan id: ${verificationId} tidak ditemukan!`
+            return responseError
+        }
 
         responseSuccess.message = "Get details verifification successfull!"
         responseSuccess.data = verificationDetailsData

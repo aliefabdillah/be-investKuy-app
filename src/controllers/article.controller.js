@@ -2,7 +2,8 @@ import artikelService from "../services/artikel.service.js";
 
 const getAll = async (req, res, next) => {
     try {
-        res.json(await artikelService.getAllArticle())
+        const response = await artikelService.getAllArticle()
+        res.status(response.code).send(response)
     } catch (error) {
         console.error(error)
         next(error)
@@ -11,7 +12,8 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res) => {
     try {
-        res.json(await artikelService.getDetailsArticle(req))
+        const response = await artikelService.getDetailsArticle(req)
+        res.status(response.code).send(response)
     } catch (error) {
         console.error(error)
     }
@@ -19,7 +21,8 @@ const getById = async (req, res) => {
 
 const create = async (req, res) => {
     try {
-        res.json(await artikelService.createArticle(req))
+        const response = await artikelService.createArticle(req)
+        res.json()
     } catch (error) {
         console.error(error)
     }
@@ -27,7 +30,8 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
     try {
-        res.json(await artikelService.updateArticle(req))
+        const response = await artikelService.updateArticle(req)
+        res.status(response.code).send(response)
     } catch (error) {
         console.error(error)
     }
@@ -35,7 +39,8 @@ const update = async (req, res) => {
 
 const deleteById = async (req, res) => {
     try {
-        res.json(await artikelService.deleteArticle(req))
+        const response = await artikelService.deleteArticle(req)
+        res.status(response.code).send(response)
     } catch (error) {
         console.error(error)
     }
