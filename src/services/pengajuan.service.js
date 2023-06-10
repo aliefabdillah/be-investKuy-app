@@ -217,6 +217,11 @@ async function getRiwayatCrowdfunding(request) {
             attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 'status']
         })
 
+        if (pengajuanResult.length == 0) {
+            responseSuccess.message = `akun ${username} saat ini tidak memiliki pengajuan pendanaan!`
+            return responseSuccess
+        }
+
         responseSuccess.message = "Get Riwayat Pengajuan Successful!"
         responseSuccess.data = pengajuanResult
         return responseSuccess
@@ -246,16 +251,21 @@ async function getRiwayatPayment(request) {
                 pemilikId: pemilik.id,
                 status: "Payment Period" || "Lunas" || "Lunas Dini" || "Tepat Waktu"
             },
-            attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_berakhir', 'angsuran', 'status']
+            attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai_bayar', 'jml_angsuran', 'status']
         })
 
-        const jatuh_tempo = new Date(tgl_mulai_bayar.getTime() + (pengajuanResult.tenor * 7 * 24 * 60 * 60 * 1000))
+        if (pengajuanResult.length == 0) {
+            responseSuccess.message = `akun ${username} saat ini tidak memiliki pengajuan!`
+            return responseSuccess
+        }
+
+        pengajuanResult.forEach(data => {
+            data.dataValues.jatuh_tempo = new Date(data.tgl_mulai_bayar.getTime() + (data.tenor * 7 * 24 * 60 * 60 * 1000))
+            console.log(data)
+        });
 
         responseSuccess.message = "Get Riwayat Pengajuan Successful!"
-        responseSuccess.data = {
-            jatuh_tempo: jatuh_tempo,
-            pengajuanResult
-        }
+        responseSuccess.data = pengajuanResult
         return responseSuccess
     } catch (error) {
         console.log(error);
@@ -447,6 +457,12 @@ async function getAllPengajuan(req) {
             attributes: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir']
         })
 
+        if (pengajuanResult.length == 0) {
+            responseSuccess.message = "Tidak ada list pengajuan saat ini!"
+            responseSuccess.data = pengajuanResult
+            return responseSuccess
+        }
+
         responseSuccess.message = "Get all pengajuan successfull!"
         responseSuccess.data = pengajuanResult
         return responseSuccess
@@ -472,6 +488,12 @@ async function getLaporanKeuangan(request){
 
         if (!laporanResult) {
             responseSuccess.message = "Laporan Keuangan is not found"
+            return responseSuccess
+        }
+
+        if (laporanResult.length == 0) {
+            responseSuccess.message = "Belum ada Laporan keuangan yang dimasukan!"
+            responseSuccess.data = laporanResult
             return responseSuccess
         }
 
@@ -507,6 +529,13 @@ async function getInvestor(request) {
             ],
             attributes: ['investorId', 'nominal']
         })
+        
+        if (listInvestor.length == 0) {
+            responseSuccess.message = "Tidak ada Investor yang melakukan pendaanaan"
+            responseSuccess.data = listInvestor
+            return responseSuccess
+        }
+
 
         responseSuccess.message = "Get list investor successfull!"
         responseSuccess.data = listInvestor
