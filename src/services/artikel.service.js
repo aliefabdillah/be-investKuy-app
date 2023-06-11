@@ -1,5 +1,6 @@
 import ResponseClass from "../models/response.model.js";
 import { Artikel } from "../models/artikel.model.js";
+import { Admin } from "../models/admin.model.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
 
 async function getAllArticle() {
@@ -45,10 +46,17 @@ async function getDetailsArticle(request) {
             return responseError;
         }
 
+        const adminData = await Admin.findOne({
+            where: {id: articleDetailsResult.adminId},
+            attributes: ['name']
+        })
+
+        delete articleDetailsResult.dataValues.adminId
+        articleDetailsResult.dataValues.adminName = adminData.name
+
         responseSuccess.message = `get article ${articleDetailsResult.title} successful!`;
         responseSuccess.data = articleDetailsResult;
         return responseSuccess;
-
 
     } catch (error) {
         console.log(error);
