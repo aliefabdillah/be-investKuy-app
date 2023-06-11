@@ -9,6 +9,8 @@ import Wallets from "../models/wallet.model.js"
 import WalletDebits from "../models/walletDebit.model.js"
 import utilsService from "./utils.service.js"
 import walletCredits from "../models/walletCredit.model.js"
+import schedule from "node-schedule"
+import moment from "moment-timezone"
 
 async function createPengajuan(request){
 
@@ -29,11 +31,12 @@ async function createPengajuan(request){
     var responseSuccess = new ResponseClass.SuccessResponse();
 
     try {
-
+        
+        moment.tz.setDefault('Asia/Jakarta')
         //menghitung tanggal berakhir (crowdfunding  dilakukan selama 7 hari)
-        const tgl_mulai = new Date()
-        const tgl_berakhir = new Date(tgl_mulai.getTime() + (7 * 24 * 60 * 60 * 1000))
-        const tgl_mulai_bayar = new Date(tgl_berakhir.getTime() + (30 * 24 * 60 * 60 * 1000))
+        const tgl_mulai = moment().toDate()
+        const tgl_berakhir = moment().add(7, 'days').toDate()
+        const tgl_mulai_bayar = moment().add(37, 'days').toDate()
 
         const pemilik = await Users.findOne({ 
             where:{username: username},
@@ -63,10 +66,10 @@ async function createPengajuan(request){
             pekerjaan,
             sektor,
             deskripsi,
-            penghasilan,
-            plafond,
-            tenor,
-            bagi_hasil,
+            penghasilan: parseInt(penghasilan),
+            plafond: parseInt(plafond),
+            tenor: parseInt(tenor),
+            bagi_hasil: parseInt(bagi_hasil),
             jenis_angsuran,
             jml_angsuran,
             akad,
@@ -260,7 +263,9 @@ async function getRiwayatPayment(request) {
         }
 
         pengajuanResult.forEach(data => {
-            data.dataValues.jatuh_tempo = new Date(data.tgl_mulai_bayar.getTime() + (data.tenor * 7 * 24 * 60 * 60 * 1000))
+            const momentMulaiBayar = moment(data.tgl_mulai_bayar)
+            data.dataValues.jatuh_tempo = momentMulaiBayar.add(data.tenor, 'weeks').toDate()
+            // data.dataValues.jatuh_tempo = new Date(data.tgl_mulai_bayar.getTime() + (data.tenor * 7 * 24 * 60 * 60 * 1000))
             console.log(data)
         });
 
@@ -559,7 +564,7 @@ async function tarikUangPendanaan(request){
                 id: pengajuanId,
                 status: "In Progress"
             }, 
-            attributes:['id', 'plafond', 'tenor', 'bagi_hasil', 'jml_angsuran', 'status', 'jml_pendanaan', 'pemilikId']
+            attributes:['id', 'plafond', 'tenor', 'bagi_hasil', 'tgl_mulai_bayar', 'jml_angsuran', 'status', 'jml_pendanaan', 'pemilikId']
         })
 
         const walletUmkm = await Wallets.findOne({
@@ -624,7 +629,13 @@ async function tarikUangPendanaan(request){
         pengajuanData.is_withdraw = true
         pengajuanData.jml_angsuran = hitungJmlAngsuran(pengajuanData.jml_pendanaan, pengajuanData.tenor, pengajuanData.bagi_hasil)
         pengajuanData.save()
-        
+
+        //setup node schedule
+        schedule.scheduleJob(pengajuanData.tgl_mulai_bayar, () => {
+            pengajuanData.status = "Payment Period"
+            pengajuanData.save()
+        })
+       
         responseSuccess.message = "Uang Pendanaan berhasil disimpan ke saldo anda!"
         return responseSuccess
 
@@ -691,9 +702,13 @@ async function bayarCicilan(request){
         //jumlah angsuran dibayar bertambah
         pengajuanData.angsuran_dibayar += pengajuanData.jml_angsuran
         const totalKewajibanBayar = pengajuanData.tenor * pengajuanData.jml_angsuran
-        const jatuhTempo = new Date(pengajuanData.tgl_mulai_bayar.getTime() + (pengajuanData.tenor * 7 * 24 * 60 * 60 * 1000))
 
-        if (pengajuanData.angsuran_dibayar == totalKewajibanBayar) {
+        const mulaiBayar = moment(pengajuanData.tgl_mulai_bayar)
+        const jatuhTempo = mulaiBayar.add(pengajuanData.tenor, 'weeks')
+
+        // const jatuhTempo = new Date(pengajuanData.tgl_mulai_bayar.getTime() + (pengajuanData.tenor * 7 * 24 * 60 * 60 * 1000))
+
+        if (pengajuanData.angsuran_dibayar >= totalKewajibanBayar) {
             pengajuanData.status = "Lunas"
         }
         pengajuanData.save()
@@ -704,12 +719,12 @@ async function bayarCicilan(request){
             investorData.repayment += investorData.weekly_income + investorData.weekly_profit
             const expectedTotalIncome = investorData.nominal + investorData.profit
 
-            if (investorData.repayment == expectedTotalIncome) {
-                investorData.tgl_selesai = new Date()
+            if (investorData.repayment >= expectedTotalIncome) {
+                investorData.tgl_selesai = moment().toDate()
 
                 if (investorData.tgl_selesai < jatuhTempo) {
                     investorData.status = "Lunas Dini"
-                }else if(investorData.tgl_selesai = jatuhTempo){
+                }else if(investorData.tgl_selesai == jatuhTempo){
                     investorData.status = "Tepat Waktu"
                 }else{
                     investorData.status = "Lunas"
