@@ -9,7 +9,7 @@ async function getAllArticle() {
 
     try {
         const articleResult = await Artikel.findAll({
-            attributes: ['id', 'title', 'tgl_terbit']
+            attributes: ['id', 'title', 'konten', 'tgl_terbit']
         });
 
         if (!articleResult) {
