@@ -31,16 +31,16 @@ router.get('/cs/users', verifyTokenMiddleware.verifyTokenCustomerService, usersC
 
 /* FAQ */
 router.get('/faq', faqController.get);                      //users
-router.post('/faq', faqController.create);                  //admin
-router.put('/faq/:faqId', faqController.update);            //admin
-router.delete('/faq/:faqId', faqController.deleteById);     //admin
+router.post('/faq', verifyTokenMiddleware.verifyTokenAdmin, faqController.create);                  //admin
+router.put('/faq/:faqId', verifyTokenMiddleware.verifyTokenAdmin, faqController.update);            //admin
+router.delete('/faq/:faqId', verifyTokenMiddleware.verifyTokenAdmin, faqController.deleteById);     //admin
 
 /* Articles */
 router.get('/articles', articleController.getAll);                  //users
 router.get('/articles/:articleId', articleController.getById);      //users
-router.post('/articles', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.create);            //admin
-router.put('/articles/:articleId', cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.update);  //admin
-router.delete('/articles/:articleId', articleController.deleteById);                                                //admin
+router.post('/articles', verifyTokenMiddleware.verifyTokenAdmin, cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.create);            //admin
+router.put('/articles/:articleId', verifyTokenMiddleware.verifyTokenAdmin, cloudinaryConfig.uploadArticleImg.single('img_url'), articleController.update);  //admin
+router.delete('/articles/:articleId', verifyTokenMiddleware.verifyTokenAdmin, articleController.deleteById);                                                //admin
 
 /* Pengajuan */
 router.post(
@@ -77,9 +77,9 @@ router.post(
     verificationController.create
 );          //USERS
 
-router.get('/verification', verificationController.getAll)  //sisi admin
-router.get('/verification/:verificationId', verificationController.getById) // sisi admin
-router.put('/verification/:verificationId/:verifiedStatus', verificationController.updateVerified)      //sisi admin
+router.get('/verification', verifyTokenMiddleware.verifyTokenAdmin, verificationController.getAll)  //sisi admin
+router.get('/verification/:verificationId', verifyTokenMiddleware.verifyTokenAdmin, verificationController.getById) // sisi admin
+router.put('/verification/:verificationId/:verifiedStatus', verifyTokenMiddleware.verifyTokenAdmin, verificationController.updateVerified)      //sisi admin
 
 /* Merchant */
 router.get('/merchants', merchantController.get);
