@@ -47,7 +47,7 @@ async function createPengajuan(request){
         const existingPengajuan = await Pengajuan.findOne({
             where: {
                 pemilikId: pemilik.id,
-                status: "Menunggu Verifikasi" || "In Progress" || "Payment Period"
+                status: ["Menunggu Verifikasi", "In Progress", "Payment Period"]
             }
         })
 
@@ -215,7 +215,7 @@ async function getRiwayatCrowdfunding(request) {
         const pengajuanResult = await Pengajuan.findAll({
             where: {
                 pemilikId: pemilik.id,
-                status: "In Progress" || "Canceled" || "Menunggu Verifikasi" || "Rejected"
+                status: ['In Progress', 'Canceled', 'Menunggu Verifikasi', 'Rejected']
             },
             attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 'status']
         })
@@ -252,7 +252,7 @@ async function getRiwayatPayment(request) {
         const pengajuanResult = await Pengajuan.findAll({
             where: {
                 pemilikId: pemilik.id,
-                status: "Payment Period" || "Lunas" || "Lunas Dini" || "Tepat Waktu"
+                status: ["Payment Period" , "Lunas" , "Lunas Dini" , "Tepat Waktu"]
             },
             attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai_bayar', 'jml_angsuran', 'status']
         })
@@ -528,7 +528,7 @@ async function getInvestor(request) {
         const listInvestor = await Pendanaan.findAll({
             where: {
                 pengajuanId: pengajuanId,
-                status: "In Progress" || "Completed"
+                status: ["In Progress", "Completed"],
             },
             include: [
                 {

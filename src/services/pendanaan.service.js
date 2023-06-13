@@ -316,7 +316,7 @@ async function getCompletedPendanaan(request) {
         const pendanaanData = await Pendanaan.findAll({
             where: {
                 investorId: userId,
-                status: "Lunas Dini" || "Tepat Waktu" || "Lunas"
+                status: ["Lunas Dini", "Tepat Waktu" , "Lunas"]
             },
             include: [
                 {
