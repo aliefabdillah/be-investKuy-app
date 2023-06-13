@@ -66,7 +66,7 @@ export const Pengajuan = db.define("t_pengajuan", {
     status:{
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: "In Progress"
+        defaultValue: "Menungggu Verifikasi"
     },
     is_withdraw:{
         type: DataTypes.BOOLEAN,

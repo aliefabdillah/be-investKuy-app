@@ -120,6 +120,16 @@ const bayarCicilanPengajuan = async(req, res, next) => {
     }
 }
 
+const getRekomendasi = async(req, res, next) => {
+    try {
+        const response = await pengajuanService.getRekomendasiPengajuan()
+        res.status(response.code).send(response)
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 export default {
     create,
     updateById,
@@ -133,4 +143,5 @@ export default {
     getInvestor,
     tarikPendanaan,
     bayarCicilanPengajuan,
+    getRekomendasi,
 }
