@@ -120,7 +120,7 @@ async function createPengajuan(request){
 
     } catch (error) {
         console.log(error);
-        responseError.message = "create Pengajuan to database error";
+        responseError.message = error.message;
         return responseError;
     }
 }
