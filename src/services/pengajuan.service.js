@@ -413,7 +413,10 @@ async function getAllPengajuan(req) {
         //query dan sort
         const wherePengajuan = {};
         const wherePemilik = {};
-        const sortColumn = req.query.sort ? req.query.sort : 'jml_pendanaan';
+        let sortColumn = 'jml_pendanaan';
+        if (req.query.sort) {
+            sortColumn = 'createdAt';
+        }
         const sortOrder = req.query.order ? req.query.order : 'DESC';
 
         wherePengajuan.status = {
