@@ -11,6 +11,7 @@ import rekeningController from "../controllers/rekening.controller.js";
 import pendanaanController from "../controllers/pendanaan.controller.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
 import verifyTokenMiddleware from "../middlewares/verifyToken.middleware.js";
+import adminPengajuanController from "../controllers/adminPengajuan.controller.js";
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -29,6 +30,12 @@ router.post('/user/register', usersController.register);
 router.get('/admin/users', verifyTokenMiddleware.verifyTokenAdmin, usersController.getAllUsers);
 router.get('/cs/users', verifyTokenMiddleware.verifyTokenCustomerService, usersController.getAllUsers);
 
+/* Admin pengajuan */
+router.get('/admin/pengajuan/list', verifyTokenMiddleware.verifyTokenAdmin, adminPengajuanController.getAll);
+router.get('/admin/pengajuan/details/:pengajuanId', verifyTokenMiddleware.verifyTokenAdmin, adminPengajuanController.getDetails);
+router.put('/admin/pengajuan/acc-pengajuan/:pengajuanId', verifyTokenMiddleware.verifyTokenAdmin, adminPengajuanController.acceptPengajuan);
+router.put('/admin/pengajuan/reject-pengajuan/:pengajuanId', verifyTokenMiddleware.verifyTokenAdmin, adminPengajuanController.rejectPengajuan);
+
 /* FAQ */
 router.get('/faq', faqController.get);                      //users
 router.post('/faq', verifyTokenMiddleware.verifyTokenAdmin, faqController.create);                  //admin
@@ -43,6 +50,7 @@ router.put('/articles/:articleId', verifyTokenMiddleware.verifyTokenAdmin, cloud
 router.delete('/articles/:articleId', verifyTokenMiddleware.verifyTokenAdmin, articleController.deleteById);                                                //admin
 
 /* Pengajuan */
+router.get('/pengajuan/rekomendasi', pengajuanController.getRekomendasi);
 router.post(
     '/pengajuan', 
     cloudinaryConfig.uploadPengajuan.any([{name:'image1'},{name:'image2'},{name:'image3'},{name:'laporan'}])

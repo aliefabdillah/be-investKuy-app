@@ -3,7 +3,7 @@ import { Pengajuan } from "../models/pengajuan.model.js"
 import { LaporanKeuangan } from "../models/laporan_keuangan.model.js"
 import { FotoUmkm } from "../models/foto_umkm.model.js"
 import Users from "../models/users.model.js"
-import { Op } from "sequelize"
+import { Op, Sequelize } from "sequelize"
 import { Pendanaan } from "../models/pendanaan.model.js"
 import Wallets from "../models/wallet.model.js"
 import WalletDebits from "../models/walletDebit.model.js"
@@ -47,7 +47,7 @@ async function createPengajuan(request){
         const existingPengajuan = await Pengajuan.findOne({
             where: {
                 pemilikId: pemilik.id,
-                status: "In Progress" || "Payment Period"
+                status: "Menunggu Verifikasi" || "In Progress" || "Payment Period"
             }
         })
 
@@ -215,7 +215,7 @@ async function getRiwayatCrowdfunding(request) {
         const pengajuanResult = await Pengajuan.findAll({
             where: {
                 pemilikId: pemilik.id,
-                status: "In Progress" || "Canceled"
+                status: "In Progress" || "Canceled" || "Menunggu Verifikasi" || "Rejected"
             },
             attributes: ['id', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 'status']
         })
@@ -329,7 +329,7 @@ async function getPengajuanById(request) {
         return responseSuccess
     } catch (error) {
         console.log(error);
-        responseError.message = "get riwayat Pengajuan from database error";
+        responseError.message = "get Pengajuan by id from database error";
         return responseError;
     }
 }
@@ -386,7 +386,7 @@ async function cancelPengajuan(request){
         //jika tidak ada batalkan
         const existingPengajuan = await Pengajuan.findOne({ where: {id : pengajuanId}})
         await existingPengajuan.update({
-            status: "Cancelled"
+            status: "Canceled"
         })
 
         responseSuccess.message = "Pengajuan berhasil dibatalkan!"
@@ -412,6 +412,7 @@ async function getAllPengajuan(req) {
 
         //query dan sort
         const wherePengajuan = {};
+        const wherePemilik = {};
         const sortColumn = req.query.sort ? req.query.sort : 'jml_pendanaan';
         const sortOrder = req.query.order ? req.query.order : 'DESC';
 
@@ -440,7 +441,7 @@ async function getAllPengajuan(req) {
         }
 
         if (req.query.lokasi) {
-            wherePengajuan.alamat = {
+            wherePemilik.alamat = {
                 [Op.like]: `%${req.query.lokasi}%`
             }
         }
@@ -451,7 +452,8 @@ async function getAllPengajuan(req) {
                 {
                     model: Users,
                     as: "pemilikDetails",
-                    attributes: ['name', 'alamat']
+                    attributes: ['name', 'alamat'],
+                    where: wherePemilik,
                 }
             ],
             order:[
@@ -641,7 +643,7 @@ async function tarikUangPendanaan(request){
 
     } catch (error) {
         console.log(error)
-        responseError.message = "Get list investor from database error!"
+        responseError.message = "Tarik pendanaan in database error!"
         return responseError
     }
 }
@@ -701,17 +703,13 @@ async function bayarCicilan(request){
 
         //jumlah angsuran dibayar bertambah
         pengajuanData.angsuran_dibayar += pengajuanData.jml_angsuran
+        pengajuanData.save()
         const totalKewajibanBayar = pengajuanData.tenor * pengajuanData.jml_angsuran
 
         const mulaiBayar = moment(pengajuanData.tgl_mulai_bayar)
         const jatuhTempo = mulaiBayar.add(pengajuanData.tenor, 'weeks')
 
         // const jatuhTempo = new Date(pengajuanData.tgl_mulai_bayar.getTime() + (pengajuanData.tenor * 7 * 24 * 60 * 60 * 1000))
-
-        if (pengajuanData.angsuran_dibayar >= totalKewajibanBayar) {
-            pengajuanData.status = "Lunas"
-        }
-        pengajuanData.save()
 
         
         //memasukan jumlah repayment dan status pembayaran ke data penadanaan
@@ -729,6 +727,11 @@ async function bayarCicilan(request){
                 }else{
                     investorData.status = "Lunas"
                 }
+
+                if (pengajuanData.angsuran_dibayar >= totalKewajibanBayar) {
+                    pengajuanData.status = investorData.status
+                }
+                pengajuanData.save()
             }
             investorData.save()
         })
@@ -738,7 +741,42 @@ async function bayarCicilan(request){
 
     } catch (error) {
         console.log(error)
-        responseError.message = "Get list investor from database error!"
+        responseError.message = "Update Bayar Cicilan to database error!"
+        return responseError
+    }
+}
+
+async function getRekomendasiPengajuan(){
+    let responseError = new ResponseClass.ErrorResponse();
+    let responseSuccess = new ResponseClass.SuccessWithNoDataResponse();
+    
+    try {
+        const pengajuanCounts = await Pengajuan.findAll({
+            attributes: [
+                'id', 'sektor', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 
+                [Sequelize.fn('COUNT', Sequelize.col('status')), 'lunas_dini_count']
+            ],
+            where: {
+                status: 'lunas dini'
+            },
+            include:[
+                {
+                    model: Users,
+                    as: "pemilikDetails",
+                    attributes: ['name', 'alamat'],
+                }
+            ],
+            group: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 'pemilikDetails.name', 'pemilikDetails.alamat'],
+            order: [[Sequelize.literal('lunas_dini_count'), 'DESC']],
+        });
+          
+        responseSuccess.message = "Get Rekomenadasi Pengajuan Success!"
+        responseSuccess.data = pengajuanCounts;
+        return responseSuccess;
+          
+    } catch (error) {
+        console.log(error);
+        responseError.message = "Get Rekomendasi Pengajuan from database error!"
         return responseError
     }
 }
@@ -787,4 +825,5 @@ export default {
     tarikUangPendanaan,
     getRiwayatPayment,
     bayarCicilan,
+    getRekomendasiPengajuan,
 }
