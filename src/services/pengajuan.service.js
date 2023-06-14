@@ -292,7 +292,7 @@ async function getPengajuanById(request) {
                 {
                     model: Users,
                     as: "pemilikDetails",
-                    attributes: ['name', 'alamat']
+                    attributes: ['name', 'alamat', 'img_url']
                 }
             ]
         })
@@ -455,7 +455,7 @@ async function getAllPengajuan(req) {
                 {
                     model: Users,
                     as: "pemilikDetails",
-                    attributes: ['name', 'alamat'],
+                    attributes: ['name', 'alamat', 'img_url'],
                     where: wherePemilik,
                 }
             ],
