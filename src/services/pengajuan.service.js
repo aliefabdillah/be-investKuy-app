@@ -66,7 +66,7 @@ async function createPengajuan(request){
             pekerjaan,
             sektor,
             deskripsi,
-            penghasilan: parseInt(penghasilan),
+            penghasilan: penghasilan,
             plafond: parseInt(plafond),
             tenor: parseInt(tenor),
             bagi_hasil: parseInt(bagi_hasil),

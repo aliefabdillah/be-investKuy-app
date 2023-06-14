@@ -21,7 +21,7 @@ export const Pengajuan = db.define("t_pengajuan", {
         allowNull: false
     },
     penghasilan: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false
     },
     plafond: {
