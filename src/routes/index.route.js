@@ -63,7 +63,7 @@ router.put(
 );              //UMKM
 router.get('/riwayat-crowdfunding/:username', pengajuanController.getRiwayatCrowdfunding)              //UMKM
 router.get('/riwayat-payment/:username', pengajuanController.getRiwayatPayment)              //UMKM
-router.get('/pengajuan-details/:pengajuanId', pengajuanController.getById)                      //UMKM
+router.get('/pengajuan-details/:pengajuanId/:userId', pengajuanController.getById)                      //UMKM
 router.post(
     '/pengajuan/:pengajuanId/tambah-laporan', 
     cloudinaryConfig.uploadPengajuan.single('laporan'), 
