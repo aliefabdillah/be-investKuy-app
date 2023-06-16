@@ -276,7 +276,7 @@ async function getInProgressPendanaan(request) {
                         {
                             model: Users,
                             as: "pemilikDetails",
-                            attributes: ['id', 'name', 'alamat']
+                            attributes: ['id', 'name', 'alamat', 'img_url']
                         }
                     ],
                     attributes: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor']
@@ -326,7 +326,7 @@ async function getCompletedPendanaan(request) {
                         {
                             model: Users,
                             as: "pemilikDetails",
-                            attributes: ['id', 'name', 'alamat']
+                            attributes: ['id', 'name', 'alamat', 'img_url']
                         }
                     ],
                     attributes: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor']
