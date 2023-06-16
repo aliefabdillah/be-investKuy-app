@@ -534,7 +534,7 @@ async function getInvestor(request) {
                 {
                     model: Users,
                     as: "investorDetails",
-                    attributes: ['name']
+                    attributes: ['name', 'img_url']
                 }
             ],
             attributes: ['investorId', 'nominal']
