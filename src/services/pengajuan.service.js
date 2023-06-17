@@ -377,7 +377,7 @@ async function cancelPengajuan(request){
         //check apakah pengajuan memiliki pendanaan atau tidak
         const existingPendanaan = await Pendanaan.findAll({ where: {pengajuanId: pengajuanId}})
         
-        if (existingPendanaan) {
+        if (existingPendanaan.length != 0) {
             //jika ada 
             responseError.message = "Pengajuan tidak dapat dibatalkan karena sudah memiliki Investor";
             return responseError;
