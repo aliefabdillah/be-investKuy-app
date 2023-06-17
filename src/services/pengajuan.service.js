@@ -375,7 +375,12 @@ async function cancelPengajuan(request){
     try {
         
         //check apakah pengajuan memiliki pendanaan atau tidak
-        const existingPendanaan = await Pendanaan.findAll({ where: {pengajuanId: pengajuanId}})
+        const existingPendanaan = await Pendanaan.findAll({ 
+            where: {
+                pengajuanId: pengajuanId,
+                status: ['In Progress', 'Lunas', 'Lunas Dini', 'Tepat Waktu'],
+            }
+        })
         
         if (existingPendanaan.length != 0) {
             //jika ada 
