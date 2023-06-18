@@ -776,6 +776,7 @@ async function getRekomendasiPengajuan(){
             ],
             group: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 'pemilikDetails.name', 'pemilikDetails.alamat'],
             order: [[Sequelize.literal('lunas_dini_count'), 'DESC']],
+            limit: 5,
         });
           
         responseSuccess.message = "Get Rekomenadasi Pengajuan Success!"
