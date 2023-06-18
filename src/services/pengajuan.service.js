@@ -771,7 +771,7 @@ async function getRekomendasiPengajuan(){
                 {
                     model: Users,
                     as: "pemilikDetails",
-                    attributes: ['name', 'alamat'],
+                    attributes: ['name', 'alamat', 'img_url'],
                 }
             ],
             group: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 'pemilikDetails.name', 'pemilikDetails.alamat'],
