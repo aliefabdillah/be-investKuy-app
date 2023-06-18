@@ -11,7 +11,7 @@ async function getAllArticle(req) {
         const limit = req.query.limit ? parseInt(req.query.limit, 10) : null
 
         const articleResult = await Artikel.findAll({
-            attributes: ['id', 'title', 'konten', 'tgl_terbit'],
+            attributes: ['id', 'title', 'img_url', 'konten', 'tgl_terbit'],
             limit: limit
         });
 
