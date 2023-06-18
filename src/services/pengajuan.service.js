@@ -797,9 +797,30 @@ async function getRekomendasiPengajuan(){
             order: [[Sequelize.literal('lunas_dini_count'), 'DESC']],
             limit: 5,
         });
+
+        const pengajuanList = await Pengajuan.findAll({
+            where: {
+                status: 'In Progress'
+            },
+            attributes: [
+                'id', 'sektor', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir'
+            ],
+            include:[
+                {
+                    model: Users,
+                    as: "pemilikDetails",
+                    attributes: ['name', 'alamat', 'img_url'],
+                }
+            ],
+            group: ['id', 'sektor', 'plafond', 'bagi_hasil', 'tenor', 'jml_pendanaan', 'tgl_mulai', 'tgl_berakhir', 'pemilikDetails.name', 'pemilikDetails.alamat', 'pemilikDetails.img_url'],
+            order: [
+                [Sequelize.col('jml_pendanaan'), 'DESC']
+            ],
+            limit: 5,
+        });
           
         responseSuccess.message = "Get Rekomenadasi Pengajuan Success!"
-        responseSuccess.data = pengajuanCounts;
+        responseSuccess.data = pengajuanList;
         return responseSuccess;
           
     } catch (error) {
