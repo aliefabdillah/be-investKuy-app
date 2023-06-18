@@ -236,7 +236,8 @@ async function tarikIncomePendanaan(request) {
         const walletInvestorDebit = await WalletDebits.create({
             amount: pendanaanData.repayment,
             type: "Penarikan Income Pendanaan",
-            walletId: currentWalletInvestor.id
+            walletId: currentWalletInvestor.id,
+            pendanaanId: pendanaanId,
         })
         
         const transactionCode = "CC" + currentWalletInvestor.id + utilsService.generateId() + walletInvestorDebit.id;
@@ -358,7 +359,6 @@ async function getCompletedPendanaan(request) {
             }
         
             data.dataValues.is_withdraw = isWithdraw;
-            console.log(data.get({ plain: true }));
         }
 
         responseSuccess.message = "Get Riwayat Pendanaan Completed successfull!"

@@ -303,10 +303,28 @@ async function getPengajuanById(request) {
         })
 
         let isFunded = false
+        let isInvestorWd = false
 
-        listInvestor.forEach((investor) => {
+        for(const investor of listInvestor) {
             if (userId == investor.investorId) {
                 isFunded = true
+            }
+        }
+
+        const walletData = await Wallets.findOne({
+            where: { userId: userId },
+            attributes: ['id'],
+        });
+
+        const investorPendanaanData = await WalletDebits.findAll({
+            where: { 
+                walletId: walletData.id,
+            },
+        });
+
+        investorPendanaanData.forEach(data => {
+            if (data.pendanaanId != null) {
+                isInvestorWd = true;
             }
         })
 
@@ -323,6 +341,7 @@ async function getPengajuanById(request) {
         responseSuccess.message = `Get Pengajuan UMKM ${pengajuanDetails.pemilikDetails.name} successfull!`
         responseSuccess.data = {
             isFunded: isFunded,
+            isInvestorWd: isInvestorWd,
             ...pengajuanDetails['dataValues'],
             foto_umkm: fotoUmkm
         }
