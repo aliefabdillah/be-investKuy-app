@@ -315,7 +315,7 @@ async function getPengajuanById(request) {
         let isFunded = false
         let isInvestorWd = false
 
-        if (userId) {
+        if (userId != 0) {
             for(const investor of listInvestor) {
                 if (userId == investor.investorId) {
                     isFunded = true
