@@ -271,7 +271,7 @@ const getAllDebitTransaction = async (walletId) => {
         walletId: walletId
       },
       attributes: [
-        'amount', 'transactionCode', 'paymentCode', 'createdAt'
+        'amount', 'transactionCode', 'paymentCode', 'type', 'createdAt'
       ],
       include: [{ model: Merchants, as: 'merchantsDetails' }]
     });
