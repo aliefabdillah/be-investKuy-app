@@ -3,7 +3,7 @@ import { Artikel } from "../models/artikel.model.js";
 import { Admin } from "../models/admin.model.js";
 import cloudinaryConfig from "../configs/cloudinary.config.js";
 
-async function getAllArticle() {
+async function getAllArticle(req) {
     var responseError = new ResponseClass.ErrorResponse();
     var responseSuccess = new ResponseClass.SuccessResponse();
 
@@ -27,7 +27,7 @@ async function getAllArticle() {
 
     } catch (error) {
         console.log(error);
-        responseError.message = "Get from database error";
+        responseError.message = error.message;
         return responseError;
     }
 }

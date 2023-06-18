@@ -2,7 +2,7 @@ import artikelService from "../services/artikel.service.js";
 
 const getAll = async (req, res, next) => {
     try {
-        const response = await artikelService.getAllArticle()
+        const response = await artikelService.getAllArticle(req)
         res.status(response.code).send(response)
     } catch (error) {
         console.error(error)
