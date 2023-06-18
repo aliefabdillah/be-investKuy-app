@@ -165,7 +165,7 @@ const createCreditTransaction = async (requestBody) => {
  * @returns
  */
 const createDebitTransaction = async (requestBody) => {
-  const { walletId, merchantId, amount } = requestBody;
+  const { walletId, merchantId, amount, type } = requestBody;
   const responseSuccess = new ResponseClass.SuccessResponse();
   const responseError = new ResponseClass.ErrorResponse();
 
@@ -189,7 +189,8 @@ const createDebitTransaction = async (requestBody) => {
     const data = await WalletDebits.create({
       walletId: Number(walletId),
       merchantId: Number(merchantId),
-      amount: Number(amount)
+      amount: Number(amount),
+      type: type,
     });
 
     const transactionCode = "CC" + merchantId + utilsService.generateId() + walletId + data.id;
