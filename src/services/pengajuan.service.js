@@ -302,32 +302,6 @@ async function getPengajuanById(request) {
             attributes: ['investorId']
         })
 
-        let isFunded = false
-        let isInvestorWd = false
-
-        for(const investor of listInvestor) {
-            if (userId == investor.investorId) {
-                isFunded = true
-            }
-        }
-
-        const walletData = await Wallets.findOne({
-            where: { userId: userId },
-            attributes: ['id'],
-        });
-
-        const investorPendanaanData = await WalletDebits.findAll({
-            where: { 
-                walletId: walletData.id,
-            },
-        });
-
-        investorPendanaanData.forEach(data => {
-            if (data.pendanaanId != null) {
-                isInvestorWd = true;
-            }
-        })
-
         const fotoUmkm = await FotoUmkm.findOne({
             where: {pengajuanId: pengajuanId},
             attributes: ['image1_url', 'image2_url', 'image3_url']
@@ -337,6 +311,35 @@ async function getPengajuanById(request) {
             responseError.message = "Pengajuan Tidak ada!"
             return responseError
         }
+
+        let isFunded = false
+        let isInvestorWd = false
+
+        if (userId) {
+            for(const investor of listInvestor) {
+                if (userId == investor.investorId) {
+                    isFunded = true
+                }
+            }
+    
+            const walletData = await Wallets.findOne({
+                where: { userId: userId },
+                attributes: ['id'],
+            });
+    
+            const investorPendanaanData = await WalletDebits.findAll({
+                where: { 
+                    walletId: walletData.id,
+                },
+            });
+    
+            investorPendanaanData.forEach(data => {
+                if (data.pendanaanId != null) {
+                    isInvestorWd = true;
+                }
+            })
+        }
+        
 
         responseSuccess.message = `Get Pengajuan UMKM ${pengajuanDetails.pemilikDetails.name} successfull!`
         responseSuccess.data = {
