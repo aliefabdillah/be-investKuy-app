@@ -316,7 +316,7 @@ async function getCompletedPendanaan(request) {
         const pendanaanData = await Pendanaan.findAll({
             where: {
                 investorId: userId,
-                status: ["Lunas Dini", "Tepat Waktu" , "Lunas"]
+                status: ["Lunas Dini", "Tepat Waktu" , "Lunas", "Withdrawed"]
             },
             include: [
                 {
@@ -334,7 +334,8 @@ async function getCompletedPendanaan(request) {
             ],
             attributes: ['id', 'nominal', 'profit', 'status', 'tgl_selesai']
         })
-
+        
+       
         if (!pendanaanData) {
             responseError.message = "Pendanaan Tidak Ada!"
             return responseError
@@ -344,6 +345,20 @@ async function getCompletedPendanaan(request) {
             responseSuccess.message = "Pendanaan Selesai Tidak Ada!"
             responseSuccess.data = pendanaanData
             return responseSuccess
+        }
+
+        for (const data of pendanaanData) {
+            let isWithdraw = false;
+            const listInvestorPendaanWd = await WalletDebits.findOne({
+                where: { pendanaanId: data.id },
+            });
+        
+            if (listInvestorPendaanWd) {
+                isWithdraw = true;
+            }
+        
+            data.dataValues.is_withdraw = isWithdraw;
+            console.log(data.get({ plain: true }));
         }
 
         responseSuccess.message = "Get Riwayat Pendanaan Completed successfull!"

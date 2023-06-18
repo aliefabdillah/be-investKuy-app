@@ -2,6 +2,7 @@ import { DataTypes } from 'sequelize';
 import db from '../configs/db.config.js';
 import Wallets from './wallet.model.js';
 import Merchants from './merchant.model.js';
+import { Pendanaan } from './pendanaan.model.js';
 
 const WalletDebits = db.define('t_wallet_debits', {
   id: {
@@ -58,6 +59,12 @@ WalletDebits.belongsTo(Wallets, {
 WalletDebits.belongsTo(Merchants, {
   foreignKey: 'merchantId',
   as: 'merchantsDetails',
+  onDelete: 'CASCADE'
+})
+
+WalletDebits.belongsTo(Pendanaan, {
+  foreignKey: 'pendanaanId',
+  as: 'pendanaanDetails',
   onDelete: 'CASCADE'
 })
 
